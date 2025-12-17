@@ -2,9 +2,18 @@
 <html lang="pt-BR" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>MarcAI Agenda - Onde a tecnologia encontra a organização</title>
     <meta name="description" content="Plataforma inteligente para agendamentos, organização e gestão do dia a dia, pensada para profissionais e clientes.">
+
+    <!-- PWA Settings -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#1e40af">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="MarcAI">
+    <link rel="icon" type="image/svg+xml" href="icon.svg">
+    <link rel="apple-touch-icon" href="icon.svg">
 
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -128,6 +137,76 @@
         </button>
     </div>
 
+    <!-- PWA Install Modal -->
+    <div id="install-modal" class="hidden fixed inset-0 z-[110] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in" onclick="if(event.target === this) closeInstallModal()">
+        <div class="bg-white rounded-3xl shadow-2xl max-w-md w-full overflow-hidden animate-slide-up relative">
+            <button onclick="closeInstallModal()" class="absolute top-4 right-4 p-2 bg-slate-50 rounded-full text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+            
+            <div class="p-8 text-center">
+                <div class="w-20 h-20 bg-blue-50 rounded-3xl flex items-center justify-center mx-auto mb-6 text-blue-600 border border-blue-100 shadow-inner rotate-3">
+                    <i data-lucide="smartphone" class="w-10 h-10"></i>
+                </div>
+                <h3 class="text-2xl font-bold text-slate-900 mb-2">Instalar App</h3>
+                <p class="text-sm text-slate-500 mb-8 leading-relaxed">Adicione o MarcAI à sua tela inicial para uma experiência completa e acesso rápido.</p>
+
+                <div class="bg-slate-100 p-1.5 rounded-xl flex mb-8">
+                    <button onclick="switchInstallTab('android')" id="tab-btn-android" class="flex-1 py-2.5 rounded-lg text-sm font-bold transition-all bg-white text-blue-900 shadow-sm">Android</button>
+                    <button onclick="switchInstallTab('ios')" id="tab-btn-ios" class="flex-1 py-2.5 rounded-lg text-sm font-bold transition-all text-slate-500 hover:text-slate-700 hover:bg-slate-200/50">iOS (iPhone)</button>
+                </div>
+
+                <!-- Content Android -->
+                <div id="install-content-android" class="text-left space-y-4 animate-fade-in">
+                    <div class="flex items-start gap-4 p-3 rounded-xl hover:bg-slate-50 transition-colors border border-transparent hover:border-slate-100">
+                        <div class="w-10 h-10 bg-white rounded-full border border-slate-200 flex items-center justify-center shrink-0 shadow-sm text-slate-700">
+                            <i data-lucide="more-vertical" class="w-5 h-5"></i>
+                        </div>
+                        <div>
+                            <div class="font-bold text-slate-900 text-sm mb-0.5">1. Abra o menu</div>
+                            <div class="text-xs text-slate-500 leading-relaxed">Toque nos 3 pontinhos no canto superior direito do Chrome.</div>
+                        </div>
+                    </div>
+                    <div class="flex items-start gap-4 p-3 rounded-xl hover:bg-slate-50 transition-colors border border-transparent hover:border-slate-100">
+                        <div class="w-10 h-10 bg-white rounded-full border border-slate-200 flex items-center justify-center shrink-0 shadow-sm text-slate-700">
+                            <i data-lucide="download" class="w-5 h-5"></i>
+                        </div>
+                        <div>
+                            <div class="font-bold text-slate-900 text-sm mb-0.5">2. Instalar</div>
+                            <div class="text-xs text-slate-500 leading-relaxed">Toque em "Adicionar à tela inicial" ou "Instalar aplicativo".</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Content iOS -->
+                <div id="install-content-ios" class="text-left space-y-4 hidden animate-fade-in">
+                    <div class="flex items-start gap-4 p-3 rounded-xl hover:bg-slate-50 transition-colors border border-transparent hover:border-slate-100">
+                        <div class="w-10 h-10 bg-white rounded-full border border-slate-200 flex items-center justify-center shrink-0 shadow-sm text-blue-600">
+                            <i data-lucide="share" class="w-5 h-5"></i>
+                        </div>
+                        <div>
+                            <div class="font-bold text-slate-900 text-sm mb-0.5">1. Compartilhar</div>
+                            <div class="text-xs text-slate-500 leading-relaxed">Toque no ícone de compartilhar na barra inferior do Safari.</div>
+                        </div>
+                    </div>
+                    <div class="flex items-start gap-4 p-3 rounded-xl hover:bg-slate-50 transition-colors border border-transparent hover:border-slate-100">
+                        <div class="w-10 h-10 bg-white rounded-full border border-slate-200 flex items-center justify-center shrink-0 shadow-sm text-slate-700">
+                            <i data-lucide="plus-square" class="w-5 h-5"></i>
+                        </div>
+                        <div>
+                            <div class="font-bold text-slate-900 text-sm mb-0.5">2. Adicionar à Tela de Início</div>
+                            <div class="text-xs text-slate-500 leading-relaxed">Role para baixo nas opções e selecione "Adicionar à Tela de Início".</div>
+                        </div>
+                    </div>
+                </div>
+
+                <button onclick="closeInstallModal()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl mt-8 transition-all shadow-lg shadow-blue-600/20 active:scale-[0.98]">
+                    Entendi
+                </button>
+            </div>
+        </div>
+    </div>
+
     <header class="fixed top-0 w-full z-50 bg-white/80 backdrop-blur-md border-b border-slate-200 transition-all duration-300">
         <div class="container mx-auto px-6 py-4">
             <div class="flex items-center justify-between">
@@ -157,15 +236,33 @@
         </div>
     </header>
 
-    <main class="pt-20 min-h-screen bg-slate-50">
+    <main class="pt-24 md:pt-32 min-h-screen bg-slate-50">
         <!-- LANDING -->
         <div id="view-landing" class="view-section active">
-            <section class="relative pt-12 pb-20 md:pt-20 md:pb-24 overflow-hidden">
+            <section class="relative pt-8 pb-20 md:pt-12 md:pb-24 overflow-hidden">
                 <div class="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full -z-10 pointer-events-none">
                     <div class="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-blue-200/30 rounded-full blur-3xl opacity-50 animate-blob"></div>
                     <div class="absolute top-[-10%] right-[-10%] w-[500px] h-[500px] bg-indigo-200/30 rounded-full blur-3xl opacity-50 animate-blob animation-delay-2000"></div>
                 </div>
                 <div class="container mx-auto px-6 text-center max-w-5xl">
+
+                    <!-- PWA Install Banner -->
+                    <div id="install-banner" class="hidden mb-8 bg-blue-50 border border-blue-200 rounded-2xl p-4 flex items-center justify-between shadow-sm max-w-2xl mx-auto text-left relative overflow-hidden group">
+                        <div class="absolute top-0 left-0 w-1 h-full bg-blue-600"></div>
+                        <div class="flex items-center gap-4 pl-2">
+                            <div class="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-blue-600 shadow-sm border border-blue-100 shrink-0">
+                                <i data-lucide="download" class="w-5 h-5"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-slate-900 text-sm">BAIXE O APP</h3>
+                                <p class="text-xs text-slate-600">Instale na tela inicial</p>
+                            </div>
+                        </div>
+                        <button onclick="openInstallModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg text-xs font-bold transition-all shadow-md hover:shadow-lg transform hover:-translate-y-0.5">
+                            INSTALAR
+                        </button>
+                    </div>
+
                     <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white border border-blue-100 text-blue-800 text-xs font-bold uppercase tracking-wide mb-8 shadow-sm">
                         <span class="relative flex h-2 w-2">
                           <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
@@ -717,6 +814,44 @@ alter table testimonials disable row level security;
 
     <!-- JS Logic -->
     <script>
+        // PWA Service Worker Registration
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js')
+                    .then(reg => console.log('SW registrado!', reg.scope))
+                    .catch(err => console.log('Falha no SW:', err));
+            });
+        }
+        
+        // PWA Install Logic
+        function openInstallModal() {
+            document.getElementById('install-modal').classList.remove('hidden');
+            // Auto-detect iOS
+            const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+            if (isIOS) switchInstallTab('ios');
+        }
+        function closeInstallModal() {
+            document.getElementById('install-modal').classList.add('hidden');
+        }
+        function switchInstallTab(os) {
+            const androidContent = document.getElementById('install-content-android');
+            const iosContent = document.getElementById('install-content-ios');
+            const androidBtn = document.getElementById('tab-btn-android');
+            const iosBtn = document.getElementById('tab-btn-ios');
+
+            if (os === 'android') {
+                androidContent.classList.remove('hidden');
+                iosContent.classList.add('hidden');
+                androidBtn.className = "flex-1 py-2.5 rounded-lg text-sm font-bold transition-all bg-white text-blue-900 shadow-sm";
+                iosBtn.className = "flex-1 py-2.5 rounded-lg text-sm font-bold transition-all text-slate-500 hover:text-slate-700 hover:bg-slate-200/50";
+            } else {
+                androidContent.classList.add('hidden');
+                iosContent.classList.remove('hidden');
+                androidBtn.className = "flex-1 py-2.5 rounded-lg text-sm font-bold transition-all text-slate-500 hover:text-slate-700 hover:bg-slate-200/50";
+                iosBtn.className = "flex-1 py-2.5 rounded-lg text-sm font-bold transition-all bg-white text-blue-900 shadow-sm";
+            }
+        }
+
         const supabaseUrl = 'https://xjqjpsxkwztxpkhqnqiv.supabase.co';
         const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhqcWpwc3hrd3p0eHBraHFucWl2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU4MTA2NDYsImV4cCI6MjA4MTM4NjY0Nn0.F8TGFyw8R6yfYTgMcdpXIS0eWOByg4qST9ZhrTv-4-w';
         const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
@@ -742,6 +877,7 @@ alter table testimonials disable row level security;
         let pendingSpecialDates = [];
         let currentRating = 0;
 
+        // Force icons render initially
         lucide.createIcons();
         
         window.addEventListener('load', () => {
@@ -756,6 +892,12 @@ alter table testimonials disable row level security;
                  navigateTo('booking-public', managerId);
              }
              
+             // PWA Banner Check
+             if (!window.matchMedia('(display-mode: standalone)').matches) {
+                 const banner = document.getElementById('install-banner');
+                 if(banner) banner.classList.remove('hidden');
+             }
+             
              loadWhatsappConfig();
              fetchTestimonialsPublic(); // Fetch testimonials for home page
              updateBrasiliaClock();
@@ -766,6 +908,9 @@ alter table testimonials disable row level security;
              const year = now.getFullYear();
              const earningFilter = document.getElementById('earnings-filter');
              if(earningFilter) earningFilter.value = `${year}-${month}`;
+             
+             // Ensure icons are rendered after load
+             setTimeout(() => lucide.createIcons(), 500);
         });
 
         // --- NAVIGATION ---
@@ -784,6 +929,9 @@ alter table testimonials disable row level security;
             if(viewId === 'manager-login') { loadSavedCredentials(); }
             if(viewId === 'booking-public' && param) { loadPublicProfile(param); }
             if(viewId === 'recovery') { initRecoveryAnimation(); } else { stopRecoveryAnimation(); }
+            
+            // Re-render icons on navigation change
+            setTimeout(() => lucide.createIcons(), 100);
         }
 
         // --- TESTIMONIALS LOGIC (PUBLIC) ---
@@ -1737,7 +1885,10 @@ alter table testimonials disable row level security;
                 if(data && data.value) waValue = data.value;
             } catch(e) {}
 
-            globalWhatsapp = waValue || ""; // Save to global variable
+            // FORCE DEFAULT IF MISSING - Fix for button visibility
+            if (!waValue) waValue = "5511999999999"; 
+
+            globalWhatsapp = waValue;
 
             const waBtn = document.getElementById('whatsapp-btn');
             const waInput = document.getElementById('config-whatsapp');
@@ -1747,7 +1898,7 @@ alter table testimonials disable row level security;
                 const message = "Olá tenho interesse em contratar a agenda, gostaria de mais informações!";
                 waBtn.href = `https://wa.me/${cleanNum}?text=${encodeURIComponent(message)}`;
                 waBtn.classList.remove('hidden');
-                waBtn.classList.add('flex');
+                waBtn.classList.add('flex'); // Ensure flex is added
                 if(waInput) waInput.value = cleanNum;
             } else {
                 waBtn.classList.add('hidden');

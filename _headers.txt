@@ -1,0 +1,2 @@
+/*
+  Link: </pwa.js>; rel=preload; as=script
