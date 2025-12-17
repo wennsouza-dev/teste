@@ -1,0 +1,2250 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MarcAI Agenda - Onde a tecnologia encontra a organização</title>
+    <meta name="description" content="Plataforma inteligente para agendamentos, organização e gestão do dia a dia, pensada para profissionais e clientes.">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            200: '#bfdbfe',
+                            500: '#3B82F6', 
+                            600: '#2563eb', 
+                            700: '#1d4ed8',
+                            800: '#1E40AF', 
+                            900: '#1e3a8a',
+                        },
+                        blue: {
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            200: '#bfdbfe',
+                            300: '#93c5fd',
+                            400: '#60a5fa',
+                            500: '#3B82F6', 
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                            800: '#1E40AF', 
+                            900: '#1e3a8a',
+                            950: '#172554',
+                        }
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.3s ease-out forwards',
+                        'slide-up': 'slideUp 0.4s ease-out forwards',
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Supabase JS -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .view-section { display: none; opacity: 0; transition: opacity 0.3s ease-in-out; }
+        .view-section.active { display: block; opacity: 1; }
+        #mobile-menu { transition: max-height 0.3s ease-in-out, opacity 0.3s ease-in-out; max-height: 0; opacity: 0; overflow: hidden; }
+        #mobile-menu.open { max-height: 400px; opacity: 1; }
+        .whatsapp-float { position: fixed; bottom: 30px; right: 30px; z-index: 100; }
+        .custom-scroll::-webkit-scrollbar { width: 6px; }
+        .custom-scroll::-webkit-scrollbar-track { background: #f1f5f9; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 10px; }
+        input, textarea, select { background-color: #ffffff !important; color: #0f172a !important; border-color: #e2e8f0 !important; transition: all 0.2s ease; }
+        input:focus, textarea:focus, select:focus { border-color: #1E40AF !important; box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.1) !important; outline: none !important; }
+        .btn-primary { background: linear-gradient(135deg, #1E40AF 0%, #2563eb 100%); }
+        .btn-primary:hover { background: linear-gradient(135deg, #1e3a8a 0%, #1d4ed8 100%); box-shadow: 0 4px 12px rgba(30, 64, 175, 0.2); }
+        .step-content { animation: fadeIn 0.4s ease-out forwards; }
+        .star-rating svg { transition: color 0.2s, fill 0.2s; }
+        
+        /* Lightbox styles */
+        #lightbox { transition: opacity 0.3s ease; }
+        #lightbox.hidden { opacity: 0; pointer-events: none; }
+        #lightbox:not(.hidden) { opacity: 1; pointer-events: auto; }
+
+        /* Carousel Styles */
+        .scroller {
+            max-width: 100%;
+            overflow: hidden; 
+            -webkit-mask: linear-gradient(90deg, transparent, white 10%, white 90%, transparent);
+            mask: linear-gradient(90deg, transparent, white 10%, white 90%, transparent);
+        }
+        .scroller__inner {
+            padding-block: 1rem;
+            display: flex;
+            flex-wrap: nowrap; 
+            gap: 1.5rem;
+            width: max-content;
+            animation: scroll 60s linear infinite; 
+        }
+        .scroller__inner:hover {
+            animation-play-state: paused;
+        }
+        
+        @keyframes scroll {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+    </style>
+<link rel="stylesheet" href="/index.css">
+</head>
+<body class="bg-slate-50 text-slate-900 antialiased selection:bg-blue-100 selection:text-blue-900">
+
+    <a id="whatsapp-btn" href="#" target="_blank" class="whatsapp-float hidden group transition-all duration-300 hover:-translate-y-1">
+        <div class="bg-[#25D366] text-white px-5 py-3 rounded-full shadow-lg shadow-green-500/20 flex items-center gap-2 font-bold hover:shadow-xl hover:shadow-green-500/30">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21l1.65-3.8a9 9 0 1 1 3.4 2.9L3 21"></path><path d="M9 10a.5.5 0 0 0 1 1h4a.5.5 0 0 0 1-1v-1"></path></svg>
+            CONTRATE NOSSA AGENDA
+        </div>
+    </a>
+
+    <!-- Lightbox Modal -->
+    <div id="lightbox" class="hidden fixed inset-0 z-[100] bg-black/90 flex items-center justify-center p-4" onclick="closeLightbox()">
+        <img id="lightbox-img" src="" class="max-w-full max-h-full rounded-lg shadow-2xl transition-transform duration-300 scale-95" onclick="event.stopPropagation()">
+        <button class="absolute top-4 right-4 text-white hover:text-gray-300" onclick="closeLightbox()">
+            <i data-lucide="x" class="w-8 h-8"></i>
+        </button>
+    </div>
+
+    <header class="fixed top-0 w-full z-50 bg-white/80 backdrop-blur-md border-b border-slate-200 transition-all duration-300">
+        <div class="container mx-auto px-6 py-4">
+            <div class="flex items-center justify-between">
+                <a href="javascript:void(0)" onclick="navigateTo('landing')" class="flex items-center gap-2 cursor-pointer group">
+                    <div class="w-9 h-9 bg-gradient-to-br from-blue-800 to-blue-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-blue-800/20 group-hover:shadow-blue-800/30 transition-all">
+                        <i data-lucide="calendar" class="w-5 h-5"></i>
+                    </div>
+                    <span class="text-xl font-bold text-slate-900 tracking-tight">MarcAI Agenda</span>
+                </a>
+                <nav class="hidden md:flex items-center gap-8">
+                    <a href="javascript:void(0)" onclick="navigateTo('landing')" class="text-sm font-medium text-slate-600 hover:text-blue-800 transition-colors">Início</a>
+                    <a href="javascript:void(0)" onclick="navigateTo('client')" class="text-sm font-medium text-slate-600 hover:text-blue-800 transition-colors">Sou Cliente</a>
+                    <a href="javascript:void(0)" onclick="handleManagerNavigation()" class="text-sm font-medium text-slate-600 hover:text-blue-800 transition-colors">Sou Profissional</a>
+                </nav>
+                <div class="hidden md:flex w-24"></div> 
+                <button id="mobile-menu-btn" class="md:hidden text-slate-600 hover:text-blue-800 focus:outline-none transition-colors">
+                    <i data-lucide="menu" class="w-6 h-6"></i>
+                </button>
+            </div>
+        </div>
+        <div id="mobile-menu" class="md:hidden bg-white border-b border-slate-100">
+            <div class="px-6 py-4 flex flex-col space-y-4">
+                <a href="javascript:void(0)" onclick="navigateTo('landing')" class="text-base font-medium text-slate-600 hover:text-blue-800">Início</a>
+                <a href="javascript:void(0)" onclick="navigateTo('client')" class="text-base font-medium text-slate-600 hover:text-blue-800">Área do Cliente</a>
+                <a href="javascript:void(0)" onclick="handleManagerNavigation()" class="text-base font-medium text-slate-600 hover:text-blue-800">Área do Profissional</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="pt-20 min-h-screen bg-slate-50">
+        <!-- LANDING -->
+        <div id="view-landing" class="view-section active">
+            <section class="relative pt-12 pb-20 md:pt-20 md:pb-24 overflow-hidden">
+                <div class="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full -z-10 pointer-events-none">
+                    <div class="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-blue-200/30 rounded-full blur-3xl opacity-50 animate-blob"></div>
+                    <div class="absolute top-[-10%] right-[-10%] w-[500px] h-[500px] bg-indigo-200/30 rounded-full blur-3xl opacity-50 animate-blob animation-delay-2000"></div>
+                </div>
+                <div class="container mx-auto px-6 text-center max-w-5xl">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white border border-blue-100 text-blue-800 text-xs font-bold uppercase tracking-wide mb-8 shadow-sm">
+                        <span class="relative flex h-2 w-2">
+                          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                          <span class="relative inline-flex rounded-full h-2 w-2 bg-blue-600"></span>
+                        </span>
+                        O futuro da organização
+                    </div>
+                    <h1 class="text-4xl md:text-6xl lg:text-7xl font-bold text-slate-900 tracking-tight leading-[1.1] mb-6">
+                        MarcAI — Onde a tecnologia <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-800 to-blue-600">encontra a organização</span>
+                    </h1>
+                    <p class="text-lg md:text-xl text-slate-600 mb-12 max-w-2xl mx-auto leading-relaxed">
+                        Plataforma inteligente para agendamentos, organização e gestão do dia a dia, pensada para profissionais e clientes.
+                    </p>
+                    <div class="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto mb-20">
+                        <div onclick="navigateTo('client')" class="group cursor-pointer bg-white p-8 rounded-2xl shadow-lg shadow-slate-200/50 border border-slate-200 hover:border-blue-400 hover:shadow-xl hover:shadow-blue-500/10 transition-all hover:-translate-y-1 relative overflow-hidden">
+                            <div class="relative z-10 flex flex-col items-center">
+                                <div class="w-16 h-16 bg-blue-50 text-blue-800 rounded-full flex items-center justify-center mb-4 group-hover:bg-blue-800 group-hover:text-white transition-colors duration-300">
+                                    <i data-lucide="search" class="w-8 h-8"></i>
+                                </div>
+                                <h3 class="text-2xl font-bold text-slate-900 mb-2">Sou Cliente</h3>
+                                <p class="text-slate-500 text-sm">Quero realizar agendamento com um profissional.</p>
+                            </div>
+                        </div>
+                        <div onclick="handleManagerNavigation()" class="group cursor-pointer bg-white p-8 rounded-2xl shadow-lg shadow-slate-200/50 border border-slate-200 hover:border-blue-600 hover:shadow-xl hover:shadow-blue-500/10 transition-all hover:-translate-y-1 relative overflow-hidden">
+                            <div class="relative z-10 flex flex-col items-center">
+                                <div class="w-16 h-16 bg-slate-50 text-blue-800 rounded-full flex items-center justify-center mb-4 group-hover:bg-blue-800 group-hover:text-white transition-colors duration-300">
+                                    <i data-lucide="briefcase" class="w-8 h-8"></i>
+                                </div>
+                                <h3 class="text-2xl font-bold text-slate-900 mb-2">Sou Profissional</h3>
+                                <p class="text-slate-500 text-sm">Gerenciar minha agenda e clientes.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- SECTION TESTIMONIALS -->
+            <section class="py-16 bg-gradient-to-b from-blue-50/50 to-white overflow-hidden border-t border-blue-50">
+                <div class="container mx-auto px-6 text-center mb-10">
+                    <h2 class="text-3xl md:text-4xl font-bold text-slate-900 mb-4">O que dizem sobre o MarcAI Agenda</h2>
+                    <p class="text-slate-500 max-w-2xl mx-auto">Clientes e profissionais que já usam e confiam na plataforma</p>
+                </div>
+                
+                <div class="scroller" data-animated="true">
+                    <div id="testimonials-list" class="scroller__inner">
+                        <!-- Items injected by JS -->
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- CLIENT AREA -->
+        <div id="view-client" class="view-section">
+            <div class="container mx-auto px-6 py-10">
+                <div class="max-w-7xl mx-auto">
+                    <div class="mb-8">
+                        <h2 class="text-3xl font-bold text-slate-900">Encontre um Profissional</h2>
+                        <p class="text-slate-600">Agende seus serviços favoritos com facilidade.</p>
+                    </div>
+                    <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 mb-10">
+                        <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
+                            <div class="md:col-span-6 relative">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <i data-lucide="search" class="w-5 h-5 text-slate-400"></i>
+                                </div>
+                                <input type="text" id="client-search" placeholder="Buscar por nome ou estabelecimento..." 
+                                    class="w-full pl-10 pr-4 py-3 border border-slate-200 rounded-lg text-sm bg-white text-slate-900 focus:ring-2 focus:ring-blue-100 focus:border-blue-500 outline-none transition-all">
+                            </div>
+                            <div class="md:col-span-3">
+                                <select id="client-filter-city" class="w-full px-4 py-3 border border-slate-200 rounded-lg text-sm bg-white text-slate-900 focus:ring-2 focus:ring-blue-100 focus:border-blue-500 outline-none">
+                                    <option value="">Todas as Cidades</option>
+                                </select>
+                            </div>
+                            <div class="md:col-span-3">
+                                <select id="client-filter-specialty" class="w-full px-4 py-3 border border-slate-200 rounded-lg text-sm bg-white text-slate-900 focus:ring-2 focus:ring-blue-100 focus:border-blue-500 outline-none">
+                                    <option value="">Todas as Especialidades</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="professionals-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- BOOKING PUBLIC -->
+        <div id="view-booking-public" class="view-section">
+            <div id="public-profile-content" class="container mx-auto px-4 py-8 max-w-2xl"></div>
+        </div>
+
+        <!-- REVIEW VIEW -->
+        <div id="view-review" class="view-section">
+            <div class="container mx-auto px-6 py-20 flex justify-center">
+                <div class="w-full max-w-lg bg-white p-8 rounded-2xl shadow-xl border border-slate-200 text-center">
+                    <div class="w-16 h-16 bg-yellow-100 text-yellow-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i data-lucide="star" class="w-8 h-8 fill-current"></i>
+                    </div>
+                    <h2 class="text-2xl font-bold text-slate-900 mb-2">Avalie seu Atendimento</h2>
+                    <p class="text-slate-500 text-sm mb-8">Sua opinião é muito importante para nós!</p>
+                    
+                    <form id="review-form" class="space-y-6">
+                        <input type="hidden" id="review-appointment-id">
+                        
+                        <div class="flex justify-center gap-2 star-rating mb-2">
+                            <button type="button" onclick="setRating(1)" class="focus:outline-none transition-transform hover:scale-110"><i data-lucide="star" class="w-10 h-10 text-slate-300"></i></button>
+                            <button type="button" onclick="setRating(2)" class="focus:outline-none transition-transform hover:scale-110"><i data-lucide="star" class="w-10 h-10 text-slate-300"></i></button>
+                            <button type="button" onclick="setRating(3)" class="focus:outline-none transition-transform hover:scale-110"><i data-lucide="star" class="w-10 h-10 text-slate-300"></i></button>
+                            <button type="button" onclick="setRating(4)" class="focus:outline-none transition-transform hover:scale-110"><i data-lucide="star" class="w-10 h-10 text-slate-300"></i></button>
+                            <button type="button" onclick="setRating(5)" class="focus:outline-none transition-transform hover:scale-110"><i data-lucide="star" class="w-10 h-10 text-slate-300"></i></button>
+                        </div>
+                        <div id="rating-feedback" class="text-sm font-bold text-yellow-500 h-5"></div>
+
+                        <textarea id="review-comment" rows="3" placeholder="Escreva um comentário (opcional)..." class="w-full px-4 py-3 border border-slate-200 rounded-lg text-sm resize-none focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400 outline-none"></textarea>
+                        
+                        <div class="text-left">
+                            <label class="block text-xs font-bold text-slate-600 mb-2 uppercase">Adicionar Foto (Opcional)</label>
+                            <label class="flex items-center gap-3 p-3 border border-slate-200 border-dashed rounded-lg cursor-pointer hover:bg-slate-50 transition-colors">
+                                <div class="w-10 h-10 bg-slate-100 rounded-lg flex items-center justify-center text-slate-400">
+                                    <i data-lucide="camera" class="w-5 h-5"></i>
+                                </div>
+                                <span class="text-sm text-slate-500 flex-1" id="review-file-name">Escolher imagem...</span>
+                                <input type="file" id="review-photo" accept="image/*" class="hidden">
+                            </label>
+                        </div>
+
+                        <button type="submit" class="w-full bg-slate-900 text-white font-bold py-3 rounded-lg hover:bg-slate-800 transition-all shadow-lg shadow-slate-900/20">Enviar Avaliação</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- MANAGER LOGIN -->
+        <div id="view-manager-login" class="view-section">
+            <div class="container mx-auto px-6 py-20 flex justify-center">
+                <div class="w-full max-w-md bg-white p-8 rounded-2xl shadow-xl border border-slate-200">
+                    <div class="text-center mb-8">
+                        <div class="w-12 h-12 bg-gradient-to-br from-blue-800 to-blue-600 text-white rounded-lg flex items-center justify-center mx-auto mb-4 shadow-lg shadow-blue-800/20">
+                            <i data-lucide="user-check" class="w-6 h-6"></i>
+                        </div>
+                        <h2 class="text-2xl font-bold text-slate-900">Acesso Profissional</h2>
+                        <p class="text-slate-500 text-sm">Gerencie sua agenda e clientes.</p>
+                    </div>
+                    <form id="manager-login-form" class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1">Usuário</label>
+                            <input type="text" id="manager-user" class="w-full px-4 py-2 border border-slate-200 bg-white text-slate-900 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none" placeholder="seu.usuario">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1">Senha</label>
+                            <input type="password" id="manager-pass" class="w-full px-4 py-2 border border-slate-200 bg-white text-slate-900 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none" placeholder="******">
+                        </div>
+                        <div class="flex items-center justify-between text-sm">
+                            <label class="flex items-center gap-2 cursor-pointer text-slate-600 hover:text-blue-800 select-none">
+                                <input type="checkbox" id="manager-remember" class="w-4 h-4 rounded border-slate-300 text-blue-800 focus:ring-blue-500">
+                                Salvar dados
+                            </label>
+                            <button type="button" onclick="navigateTo('recovery')" class="text-blue-800 hover:underline font-medium">
+                                Esqueci a senha
+                            </button>
+                        </div>
+                        <p id="manager-error-msg" class="text-red-500 text-sm text-center hidden"></p>
+                        <button type="submit" class="w-full btn-primary text-white font-bold py-2.5 rounded-lg transition-all transform active:scale-[0.98]">
+                            Entrar
+                        </button>
+                    </form>
+                    <div class="mt-6 text-center">
+                         <button onclick="navigateTo('landing')" class="text-xs text-slate-400 hover:text-blue-800 underline">Voltar para o início</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div id="view-recovery" class="view-section">
+            <div class="container mx-auto px-6 py-20 flex justify-center">
+                <div class="w-full max-w-md bg-white p-8 rounded-2xl shadow-xl border border-slate-200">
+                    <div class="text-center mb-6"><h2 class="text-2xl font-bold text-slate-900">Recuperação de Acesso</h2></div>
+                     <div class="bg-slate-50 rounded-lg p-4 border border-slate-200 mb-6 text-center relative overflow-hidden">
+                        <div class="text-xs text-slate-500 uppercase tracking-wide font-semibold mb-1">Token de Segurança</div>
+                        <div id="auth-code-display" class="text-3xl font-mono font-bold text-slate-900 tracking-[0.2em]">000 000</div>
+                        <div class="absolute bottom-0 left-0 h-1 bg-blue-800 animate-progress w-full"></div>
+                    </div>
+                    <form id="recovery-form" class="space-y-4">
+                        <input type="text" id="recover-user" class="w-full px-4 py-2 border border-slate-200 rounded-lg" required placeholder="Usuário">
+                        <input type="text" id="recover-secret" class="w-full px-4 py-2 border border-slate-200 rounded-lg" required placeholder="Palavra Secreta">
+                        <input type="password" id="recover-new-pass" minlength="6" class="w-full px-4 py-2 border border-slate-200 rounded-lg" required placeholder="Nova senha">
+                        <p id="recover-error-msg" class="text-red-500 text-sm text-center hidden"></p>
+                        <button type="submit" class="w-full btn-primary text-white font-bold py-2.5 rounded-lg">Redefinir Senha</button>
+                    </form>
+                    <div class="mt-6 text-center"><button onclick="navigateTo('manager-login')" class="text-xs text-blue-800 hover:underline">Voltar para o Login</button></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="view-manager" class="view-section">
+             <!-- Banner de Expiração -->
+             <div id="expiration-banner" class="hidden bg-amber-50 border-b border-amber-200 px-6 py-3">
+                <div class="container mx-auto flex items-center justify-between">
+                    <div class="flex items-center gap-2 text-amber-800 text-sm font-medium">
+                        <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+                        <span>Atenção: Seu plano expira em <strong id="expiration-days-count">0</strong> dias.</span>
+                    </div>
+                    <a id="btn-renew-plan" href="#" target="_blank" class="text-xs bg-amber-600 text-white px-3 py-1.5 rounded hover:bg-amber-700 transition-colors shadow-sm font-bold">Renovar Agora</a>
+                </div>
+            </div>
+
+             <div class="container mx-auto px-6 py-8">
+                <div class="max-w-6xl mx-auto">
+                    <div class="flex items-center justify-between mb-8">
+                        <div><h2 class="text-3xl font-bold text-slate-900">Olá, <span id="manager-name-display" class="text-blue-800">Profissional</span></h2><p class="text-slate-500" id="manager-est-display">Painel de Gestão</p></div>
+                        <div class="flex gap-3"><button onclick="logoutManager()" class="bg-white border border-slate-200 text-slate-600 px-4 py-2 rounded-lg text-sm font-medium hover:bg-slate-50 hover:text-red-600 transition-colors flex items-center gap-2 shadow-sm"><i data-lucide="log-out" class="w-4 h-4"></i> Sair</button></div>
+                    </div>
+                    
+                    <div class="flex border-b border-slate-200 mb-8 overflow-x-auto">
+                        <button onclick="switchManagerTab('dashboard')" id="tab-dashboard" class="manager-tab px-6 py-3 text-sm font-medium text-blue-800 border-b-2 border-blue-800 transition-colors whitespace-nowrap">Início</button>
+                        <button onclick="switchManagerTab('profile')" id="tab-profile" class="manager-tab px-6 py-3 text-sm font-medium text-slate-500 hover:text-blue-800 transition-colors whitespace-nowrap">Perfil & Serviços</button>
+                        <button onclick="switchManagerTab('schedule')" id="tab-schedule" class="manager-tab px-6 py-3 text-sm font-medium text-slate-500 hover:text-blue-800 transition-colors whitespace-nowrap">Horários</button>
+                    </div>
+
+                    <div id="content-dashboard" class="manager-tab-content active">
+                         <div class="grid md:grid-cols-3 gap-6 mb-8">
+                            <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200"><div class="text-slate-500 text-sm mb-1 font-medium uppercase tracking-wide">Ganhos Hoje</div><div class="text-3xl font-bold text-slate-900" id="dash-earnings-today">R$ 0,00</div></div>
+                            <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+                                <div class="flex justify-between items-start mb-1">
+                                    <div class="text-slate-500 text-sm font-medium uppercase tracking-wide">Ganhos Totais</div>
+                                    <div class="flex gap-1">
+                                         <input type="month" id="earnings-filter" class="text-xs border border-slate-200 rounded px-2 py-1 bg-slate-50 outline-none focus:border-blue-500 w-32">
+                                         <button onclick="refreshEarningsFromUI()" class="text-xs bg-blue-800 text-white px-2 py-1 rounded hover:bg-blue-900">Filtrar</button>
+                                    </div>
+                                </div>
+                                <div class="text-3xl font-bold text-slate-900" id="dash-earnings-total">R$ 0,00</div>
+                            </div>
+                            <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200"><div class="text-slate-500 text-sm mb-1 font-medium uppercase tracking-wide">Agendamentos Pendentes</div><div class="text-3xl font-bold text-blue-800" id="dash-pending-count">0</div></div>
+                        </div>
+
+                        <!-- Link de Agendamento -->
+                        <div id="manager-link-section" class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 text-center mb-10 mx-auto hidden">
+                            <h3 class="text-lg font-bold text-slate-900">Seu Link de Agendamento</h3>
+                            <div class="max-w-md mx-auto flex items-center gap-2 mt-4">
+                                <input type="text" id="manager-link-input" readonly class="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-600 text-sm text-center">
+                                <button onclick="copyManagerLink()" class="btn-primary text-white px-6 py-2 rounded-lg text-sm font-bold">Copiar</button>
+                            </div>
+                        </div>
+
+                        <!-- Agendamentos de Hoje -->
+                        <div class="mb-10">
+                            <h3 class="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2"><span class="w-1.5 h-6 bg-blue-800 rounded-full"></span> Agendamentos de Hoje</h3>
+                            <div id="list-today" class="space-y-4"></div>
+                        </div>
+
+                        <!-- Próximos Agendamentos com Filtro -->
+                        <div class="mb-10">
+                            <div class="flex justify-between items-center mb-4">
+                                <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2"><span class="w-1.5 h-6 bg-blue-500 rounded-full"></span> Próximos Agendamentos</h3>
+                                <div class="flex gap-2">
+                                    <input type="date" id="future-filter-date" class="text-sm border border-slate-200 rounded-lg px-3 py-1.5 bg-white text-slate-600">
+                                    <button onclick="renderFutureAppointments()" class="bg-blue-50 text-blue-700 px-3 py-1.5 rounded-lg text-sm font-bold hover:bg-blue-100 flex items-center gap-1"><i data-lucide="search" class="w-3 h-3"></i> Buscar</button>
+                                </div>
+                            </div>
+                            <div id="list-future" class="space-y-4"></div>
+                        </div>
+
+                        <!-- Agendamentos Concluídos -->
+                        <div class="mb-8">
+                             <h3 class="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2"><span class="w-1.5 h-6 bg-green-600 rounded-full"></span> Histórico Concluído</h3>
+                             <div id="list-completed" class="space-y-4"></div>
+                        </div>
+                    </div>
+                    
+                    <div id="content-profile" class="manager-tab-content hidden">
+                         <div class="grid md:grid-cols-3 gap-8">
+                            <div class="md:col-span-1 space-y-6">
+                                <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+                                    <h4 class="font-bold text-slate-900 mb-4 border-b border-slate-100 pb-2">Dados do Perfil</h4>
+                                    <div class="mb-6 text-center">
+                                        <div id="preview-photo" class="w-24 h-24 bg-slate-100 rounded-full mx-auto mb-3 flex items-center justify-center text-slate-300 overflow-hidden border border-slate-200 shadow-inner"><i data-lucide="user" class="w-10 h-10"></i></div>
+                                        <label class="inline-flex items-center gap-2 text-xs text-blue-800 cursor-pointer hover:text-blue-900 font-semibold bg-blue-50 px-3 py-1.5 rounded-full transition-colors"><i data-lucide="upload" class="w-3 h-3"></i> Fazer Upload<input type="file" id="profile-photo-upload" accept="image/*" class="hidden"></label>
+                                        <div id="upload-feedback" class="text-[10px] text-slate-400 mt-1"></div>
+                                    </div>
+                                    <div class="space-y-4">
+                                        <div><label class="block text-xs font-semibold text-slate-600 mb-1">WhatsApp</label><input type="text" id="profile-whatsapp" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm"></div>
+                                        <div><label class="block text-xs font-semibold text-slate-600 mb-1">Endereço</label><textarea id="profile-address" rows="3" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm resize-none"></textarea></div>
+                                        <button onclick="saveManagerProfile()" class="w-full btn-primary text-white py-2.5 rounded-lg text-sm font-bold">Salvar Dados</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="md:col-span-2">
+                                <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+                                    <div class="flex justify-between items-center mb-6"><h4 class="font-bold text-slate-900">Meus Serviços</h4><button onclick="toggleServiceForm()" class="bg-slate-100 text-slate-700 px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-slate-200 flex items-center gap-1 transition-colors"><i data-lucide="plus" class="w-3 h-3"></i> Novo Serviço</button></div>
+                                    <div id="service-form" class="hidden bg-slate-50 p-6 rounded-xl border border-slate-200 mb-6 shadow-inner">
+                                        <div class="grid grid-cols-2 gap-4 mb-4">
+                                            <div class="col-span-2 md:col-span-1"><input type="text" id="svc-name" placeholder="Nome" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm"></div>
+                                            <div class="col-span-1"><input type="number" id="svc-price" placeholder="Valor" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm"></div>
+                                            <div class="col-span-1"><input type="number" id="svc-duration" placeholder="Minutos" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm"></div>
+                                        </div>
+                                        <div class="mb-4"><textarea id="svc-policy" rows="2" placeholder="Política (opcional)" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm resize-none"></textarea></div>
+                                        <div class="flex justify-end gap-2"><button onclick="toggleServiceForm()" class="text-slate-500 text-xs px-4 py-2">Cancelar</button><button onclick="addManagerService()" class="bg-green-600 text-white px-4 py-2 rounded-lg text-xs font-bold hover:bg-green-700">Salvar Serviço</button></div>
+                                    </div>
+                                    <div id="services-list" class="space-y-3"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="content-schedule" class="manager-tab-content hidden">
+                         <div class="bg-white p-8 rounded-xl border border-slate-200 max-w-2xl mx-auto shadow-sm">
+                            <h4 class="font-bold text-slate-900 mb-6 border-b border-slate-100 pb-2">Configuração de Horários</h4>
+                            
+                            <!-- Abas de Sub-configuração -->
+                            <div class="flex gap-4 mb-6 border-b border-slate-100">
+                                <button onclick="toggleScheduleSubTab('weekly')" id="subtab-weekly" class="pb-2 text-sm font-bold text-blue-800 border-b-2 border-blue-800 transition-colors">Semanal</button>
+                                <button onclick="toggleScheduleSubTab('special')" id="subtab-special" class="pb-2 text-sm font-bold text-slate-400 hover:text-blue-800 transition-colors">Horários Especiais</button>
+                            </div>
+
+                            <!-- Weekly Config -->
+                            <div id="schedule-weekly-content">
+                                <div class="space-y-4" id="schedule-config-container"></div>
+                                <div class="mt-8 border-t border-slate-100 pt-6">
+                                    <label class="flex items-center gap-2 mb-4 cursor-pointer"><input type="checkbox" id="has-lunch-break" class="w-4 h-4 text-blue-800 border-slate-300 rounded focus:ring-blue-500"><span class="text-sm font-medium text-slate-700">Possui Horário de Almoço?</span></label>
+                                    <div id="lunch-break-config" class="grid grid-cols-2 gap-4 hidden bg-slate-50 p-4 rounded-lg">
+                                        <div><span class="text-xs font-semibold text-slate-500 block mb-1">Início</span><input type="time" id="lunch-start" class="w-full px-3 py-2 border border-slate-200 bg-white text-slate-900 rounded-lg text-sm"></div>
+                                        <div><span class="text-xs font-semibold text-slate-500 block mb-1">Fim</span><input type="time" id="lunch-end" class="w-full px-3 py-2 border border-slate-200 bg-white text-slate-900 rounded-lg text-sm"></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Special Dates Config -->
+                            <div id="schedule-special-content" class="hidden">
+                                <div class="bg-slate-50 p-4 rounded-lg border border-slate-200 mb-4">
+                                    <h5 class="text-sm font-bold text-slate-900 mb-3">Adicionar Data Específica</h5>
+                                    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-3">
+                                        <div class="col-span-2 md:col-span-1"><label class="text-[10px] font-bold text-slate-500 uppercase">Data</label><input type="date" id="special-date" class="w-full px-2 py-1.5 border border-slate-200 rounded text-sm bg-white"></div>
+                                        <div class="col-span-1"><label class="text-[10px] font-bold text-slate-500 uppercase">Abertura</label><input type="time" id="special-start" class="w-full px-2 py-1.5 border border-slate-200 rounded text-sm bg-white"></div>
+                                        <div class="col-span-1"><label class="text-[10px] font-bold text-slate-500 uppercase">Fechamento</label><input type="time" id="special-end" class="w-full px-2 py-1.5 border border-slate-200 rounded text-sm bg-white"></div>
+                                        <div class="col-span-2 md:col-span-1 flex items-end"><label class="flex items-center gap-2 cursor-pointer pb-2"><input type="checkbox" id="special-closed" class="w-4 h-4 text-red-600 rounded"><span class="text-xs font-bold text-slate-700">Não haverá atendimento</span></label></div>
+                                    </div>
+                                    <button onclick="addSpecialDate()" class="w-full bg-slate-800 text-white py-2 rounded text-xs font-bold hover:bg-slate-900">Adicionar Regra</button>
+                                </div>
+                                <div id="special-dates-list" class="space-y-2 max-h-64 overflow-y-auto custom-scroll">
+                                    <div class="text-center text-xs text-slate-400 py-4">Nenhuma data especial configurada.</div>
+                                </div>
+                            </div>
+
+                            <div class="mt-8 text-right"><button onclick="saveManagerSchedule()" class="btn-primary text-white px-8 py-2.5 rounded-lg text-sm font-bold shadow-md hover:shadow-lg transition-all">Salvar Horários</button></div>
+                         </div>
+                    </div>
+                </div>
+             </div>
+        </div>
+        
+        <div id="view-developer-login" class="view-section">
+              <div class="container mx-auto px-6 py-20 flex justify-center">
+                <div class="w-full max-w-md bg-white p-8 rounded-2xl shadow-xl border border-slate-200">
+                    <h2 class="text-2xl font-bold text-slate-900 text-center mb-8">Acesso Restrito</h2>
+                    <form id="dev-login-form" class="space-y-4">
+                        <input type="password" id="dev-password" class="w-full px-4 py-2 border border-slate-200 rounded-lg" placeholder="Senha">
+                        <p id="dev-error-msg" class="text-red-500 text-sm text-center hidden">Senha incorreta.</p>
+                        <button type="submit" class="w-full bg-slate-900 text-white font-bold py-2.5 rounded-lg">Acessar Painel</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div id="view-developer-dashboard" class="view-section">
+             <div class="bg-slate-900 text-white pb-20 pt-10">
+                <div class="container mx-auto px-6">
+                    <div class="flex items-center justify-between mb-8">
+                        <div><h2 class="text-3xl font-bold">Painel Administrativo</h2></div>
+                        <button onclick="logoutDev()" class="text-sm text-slate-400 hover:text-white flex items-center gap-2"><i data-lucide="log-out" class="w-4 h-4"></i> Sair</button>
+                    </div>
+                    <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                        <div class="bg-slate-800 p-4 rounded-lg border border-slate-700"><div class="text-slate-400 text-xs mb-1">Total Profissionais</div><div class="text-2xl font-bold" id="stat-managers">-</div></div>
+                        <div class="bg-slate-800 p-4 rounded-lg border border-slate-700"><div class="text-slate-400 text-xs mb-1">Leads (Espera)</div><div class="text-2xl font-bold" id="stat-leads">-</div></div>
+                         <div class="bg-slate-800 p-4 rounded-lg border border-slate-700"><div class="text-slate-400 text-xs mb-1">Status Sistema</div><div class="text-2xl font-bold text-green-400">Online</div></div>
+                    </div>
+                </div>
+            </div>
+            <div class="container mx-auto px-6 -mt-12 space-y-8 pb-12">
+                 <!-- Config Section (WhatsApp) -->
+                <div class="bg-white rounded-xl shadow-lg border border-slate-200 overflow-hidden max-w-4xl mx-auto">
+                    <div class="bg-slate-50 px-6 py-4 border-b border-slate-200 flex justify-between items-center"><h3 class="font-bold text-slate-900 flex items-center gap-2"><i data-lucide="settings" class="w-4 h-4"></i> Configurações do Site</h3></div>
+                    <div class="p-6">
+                        <form id="form-config-whatsapp" class="flex items-end gap-4">
+                            <div class="flex-1"><label class="block text-xs font-semibold text-slate-600 mb-1">WhatsApp</label><input type="text" id="config-whatsapp" placeholder="5511999999999" class="w-full px-4 py-2 border border-slate-200 rounded-lg text-sm"></div>
+                            <button type="submit" class="bg-green-600 text-white py-2 px-6 rounded-lg text-sm font-bold hover:bg-green-700">Salvar</button>
+                        </form>
+                    </div>
+                </div>
+                 <!-- SQL Section -->
+                <div class="bg-white rounded-xl shadow-lg border border-slate-200 overflow-hidden max-w-4xl mx-auto">
+                    <div class="bg-slate-50 px-6 py-4 border-b border-slate-200 flex justify-between items-center"><h3 class="font-bold text-slate-900 flex items-center gap-2"><i data-lucide="database" class="w-4 h-4"></i> Setup do Banco de Dados (SQL)</h3></div>
+                    <div class="p-6">
+                        <p class="text-sm text-slate-600 mb-2"><b>ATENÇÃO:</b> Se você já criou as tabelas antes, copie e rode este código novamente para adicionar as colunas novas.</p>
+                        <div class="relative">
+                            <pre class="bg-slate-900 text-slate-50 p-4 rounded-lg text-xs font-mono overflow-x-auto" id="sql-code-block">
+-- Configs
+create table if not exists config (key text primary key, value text);
+
+-- Managers
+create table if not exists managers (
+  id bigint generated by default as identity primary key, 
+  created_at timestamp with time zone default timezone('utc'::text, now()) not null, 
+  name text, 
+  establishment_name text, 
+  specialty text, 
+  city text, 
+  neighborhood text, 
+  username text, 
+  temp_password text, 
+  expiration_days int default 30, 
+  is_active boolean default true, 
+  secret_word text, 
+  photo_url text, 
+  contact_whatsapp text, 
+  address text, 
+  services jsonb default '[]'::jsonb, 
+  working_hours jsonb default '{}'::jsonb, 
+  enable_custom_link boolean default false, 
+  enable_reviews boolean default false
+);
+
+-- MIGRATION (Novas Colunas): Rode isso se der erro ao salvar gerente
+alter table managers add column if not exists enable_custom_link boolean default false;
+alter table managers add column if not exists enable_reviews boolean default false;
+
+-- Appointments
+create table if not exists appointments (id bigint generated by default as identity primary key, created_at timestamp with time zone default timezone('utc'::text, now()) not null, manager_id bigint references managers(id), client_name text, client_phone text, service_name text, service_price numeric, service_duration int, appointment_time timestamp with time zone, status text default 'pending', notes text);
+
+-- Reviews
+create table if not exists reviews (id bigint generated by default as identity primary key, appointment_id bigint references appointments(id), rating int, comment text, photo_url text, created_at timestamp with time zone default timezone('utc'::text, now()) not null);
+
+-- Leads
+create table if not exists leads (id bigint generated by default as identity primary key, created_at timestamp with time zone default timezone('utc'::text, now()) not null, email text);
+
+-- Testimonials (Comentários da Home)
+create table if not exists testimonials (
+  id bigint generated by default as identity primary key,
+  created_at timestamp with time zone default timezone('utc'::text, now()) not null,
+  name text,
+  user_type text, -- 'Cliente' ou 'Profissional'
+  comment text,
+  rating int default 5,
+  photo_url text,
+  is_active boolean default true
+);
+
+-- Policies (RLS)
+alter table managers disable row level security;
+alter table config disable row level security;
+alter table appointments disable row level security;
+alter table leads disable row level security;
+alter table reviews disable row level security;
+alter table testimonials disable row level security;
+
+-- Automation (Opcional - Requer pg_cron)
+-- create extension if not exists pg_cron;
+-- select cron.schedule('daily_expiration', '0 0 * * *', 'update managers set expiration_days = expiration_days - 1 where expiration_days > 0');
+</pre>
+                            <button onclick="copySql()" class="absolute top-2 right-2 bg-white/10 hover:bg-white/20 text-white px-3 py-1 rounded text-xs border border-white/20">Copiar SQL</button>
+                        </div>
+                    </div>
+                </div>
+                
+                 <!-- Testimonials Management (NEW) -->
+                 <div class="bg-white rounded-xl shadow-lg border border-slate-200 overflow-hidden max-w-4xl mx-auto">
+                    <div class="bg-slate-50 px-6 py-4 border-b border-slate-200 flex justify-between items-center"><h3 class="font-bold text-slate-900 flex items-center gap-2"><i data-lucide="message-square" class="w-4 h-4"></i> Gerenciar Comentários (Home)</h3><button onclick="resetTestimonialForm()" class="text-xs bg-red-100 hover:bg-red-200 text-red-700 px-3 py-1.5 rounded transition-colors hidden font-bold flex items-center gap-1" id="btn-new-testimonial"><i data-lucide="x" class="w-3 h-3"></i> Cancelar Edição</button></div>
+                    <div class="p-6">
+                        <form id="form-create-testimonial" class="space-y-4 mb-8">
+                            <input type="hidden" name="id" id="testimonial-id">
+                            <div class="grid md:grid-cols-2 gap-4">
+                                <div class="col-span-2 md:col-span-1"><label class="block text-xs font-semibold text-slate-600 mb-1">Nome</label><input type="text" name="name" id="t-name" required class="w-full px-4 py-2 border border-slate-200 rounded-lg text-sm"></div>
+                                <div class="col-span-2 md:col-span-1">
+                                    <label class="block text-xs font-semibold text-slate-600 mb-1">Tipo de Usuário</label>
+                                    <select name="user_type" id="t-type" class="w-full px-4 py-2 border border-slate-200 rounded-lg text-sm">
+                                        <option value="Cliente">Cliente</option>
+                                        <option value="Profissional">Profissional</option>
+                                    </select>
+                                </div>
+                                <div class="col-span-2"><label class="block text-xs font-semibold text-slate-600 mb-1">Comentário</label><textarea name="comment" id="t-comment" rows="2" required class="w-full px-4 py-2 border border-slate-200 rounded-lg text-sm resize-none"></textarea></div>
+                                <div class="col-span-2 md:col-span-1">
+                                    <label class="block text-xs font-semibold text-slate-600 mb-1">Foto (Avatar)</label>
+                                    <input type="file" id="t-photo-upload" accept="image/*" class="w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                                </div>
+                                <div class="col-span-2 md:col-span-1 flex items-center pt-6">
+                                    <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" name="is_active" id="t-active" checked class="w-4 h-4 text-blue-600 rounded border-slate-300"><span class="text-sm font-semibold text-slate-700">Ativo (Exibir na Home)</span></label>
+                                </div>
+                            </div>
+                            <button type="submit" id="btn-submit-testimonial" class="w-full bg-slate-900 text-white py-3 rounded-lg text-sm font-bold hover:bg-slate-800 flex items-center justify-center gap-2 shadow-md">
+                                <i data-lucide="plus-circle" class="w-4 h-4"></i>
+                                <span id="btn-text-testimonial">Adicionar Comentário</span>
+                            </button>
+                        </form>
+                        <h4 class="text-xs font-bold text-slate-400 uppercase mb-3 border-b border-slate-100 pb-2">Comentários Cadastrados</h4>
+                        <div class="space-y-2 max-h-60 overflow-y-auto custom-scroll" id="list-testimonials"><div class="text-sm text-slate-400 italic text-center py-4">Carregando...</div></div>
+                    </div>
+                </div>
+
+                 <!-- Managers List -->
+                 <div class="bg-white rounded-xl shadow-lg border border-slate-200 overflow-hidden max-w-4xl mx-auto">
+                    <div class="bg-slate-50 px-6 py-4 border-b border-slate-200 flex justify-between items-center"><h3 class="font-bold text-slate-900 flex items-center gap-2"><i data-lucide="briefcase" class="w-4 h-4"></i> Gerenciar Profissionais</h3><button onclick="resetManagerForm()" class="text-xs bg-red-100 hover:bg-red-200 text-red-700 px-3 py-1.5 rounded transition-colors hidden font-bold flex items-center gap-1" id="btn-new-manager"><i data-lucide="x" class="w-3 h-3"></i> Cancelar Edição / Novo</button></div>
+                    <div class="p-6">
+                        <form id="form-create-manager" class="space-y-4 mb-8">
+                            <input type="hidden" name="id" id="manager-id">
+                            <div class="grid md:grid-cols-2 gap-4">
+                                <div class="col-span-2 md:col-span-1"><label class="block text-xs font-semibold text-slate-600 mb-1">Nome</label><input type="text" name="name" id="field-name" required class="w-full px-4 py-2 border border-slate-200 rounded-lg text-sm"></div>
+                                <div class="col-span-2 md:col-span-1"><label class="block text-xs font-semibold text-slate-600 mb-1">Estabelecimento</label><input type="text" name="establishment_name" id="field-est" required class="w-full px-4 py-2 border border-slate-200 rounded-lg text-sm"></div>
+                                <div class="col-span-2 md:col-span-1"><label class="block text-xs font-semibold text-slate-600 mb-1">Especialidade</label><input type="text" name="specialty" id="field-spec" required class="w-full px-4 py-2 border border-slate-200 rounded-lg text-sm"></div>
+                                <div class="col-span-2 md:col-span-1"><label class="block text-xs font-semibold text-slate-600 mb-1">Cidade</label><input type="text" name="city" id="field-city" required class="w-full px-4 py-2 border border-slate-200 rounded-lg text-sm"></div>
+                                <div class="col-span-2 md:col-span-1"><label class="block text-xs font-semibold text-slate-600 mb-1">Bairro</label><input type="text" name="neighborhood" id="field-neigh" required class="w-full px-4 py-2 border border-slate-200 rounded-lg text-sm"></div>
+                                <div class="col-span-2 md:col-span-1"><label class="block text-xs font-semibold text-slate-600 mb-1">Usuário</label><input type="text" name="username" id="field-user" required class="w-full px-4 py-2 border border-slate-200 rounded-lg text-sm"></div>
+                                <div class="col-span-2 md:col-span-1"><label class="block text-xs font-semibold text-slate-600 mb-1">Senha Temp</label><input type="text" name="temp_password" id="field-pass" required class="w-full px-4 py-2 border border-slate-200 rounded-lg text-sm"></div>
+                                <div class="col-span-2 md:col-span-1"><label class="block text-xs font-semibold text-slate-600 mb-1">Dias Expiração</label><input type="number" name="expiration_days" id="field-exp" required class="w-full px-4 py-2 border border-slate-200 rounded-lg text-sm" min="0"></div>
+                                <div class="col-span-2 md:col-span-1"><label class="block text-xs font-semibold text-slate-600 mb-1">Palavra Secreta</label><input type="text" name="secret_word" id="field-secret" required class="w-full px-4 py-2 border border-slate-200 rounded-lg text-sm"></div>
+                                <div class="col-span-2 flex gap-6 mt-2">
+                                    <label class="flex items-center gap-2 cursor-pointer">
+                                        <input type="checkbox" name="enable_custom_link" id="field-enable-link" class="w-4 h-4 text-blue-600 rounded border-slate-300">
+                                        <span class="text-sm font-semibold text-slate-700">Link Personalizado</span>
+                                    </label>
+                                    <label class="flex items-center gap-2 cursor-pointer">
+                                        <input type="checkbox" name="enable_reviews" id="field-enable-reviews" class="w-4 h-4 text-blue-600 rounded border-slate-300">
+                                        <span class="text-sm font-semibold text-slate-700">Sistema de Avaliação</span>
+                                    </label>
+                                </div>
+                            </div>
+                            <button type="submit" id="btn-submit-manager" class="w-full bg-slate-900 text-white py-3 rounded-lg text-sm font-bold hover:bg-slate-800 flex items-center justify-center gap-2 shadow-md">
+                                <i data-lucide="plus-circle" class="w-4 h-4"></i>
+                                <span id="btn-text-manager">Adicionar Profissional</span>
+                            </button>
+                        </form>
+                        <h4 class="text-xs font-bold text-slate-400 uppercase mb-3 border-b border-slate-100 pb-2">Profissionais Cadastrados</h4>
+                        <div class="space-y-2 max-h-60 overflow-y-auto custom-scroll" id="list-managers"><div class="text-sm text-slate-400 italic text-center py-4">Carregando...</div></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-slate-200 py-8 mt-12">
+        <div class="container mx-auto px-6 text-center">
+            <p class="text-slate-400 text-xs mb-4">
+                © 2024 MarcAI Agenda.
+            </p>
+            <button onclick="navigateTo('developer-login')" class="text-[10px] uppercase tracking-wide text-slate-300 hover:text-slate-500 transition-colors">
+                Desenvolvedor
+            </button>
+        </div>
+    </footer>
+
+    <!-- JS Logic -->
+    <script>
+        const supabaseUrl = 'https://xjqjpsxkwztxpkhqnqiv.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhqcWpwc3hrd3p0eHBraHFucWl2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU4MTA2NDYsImV4cCI6MjA4MTM4NjY0Nn0.F8TGFyw8R6yfYTgMcdpXIS0eWOByg4qST9ZhrTv-4-w';
+        const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+        
+        let adminManagersList = []; 
+        let adminTestimonialsList = []; // New state for testimonials
+        let currentManager = null; 
+        let globalWhatsapp = "";
+        
+        let globalToday = [];
+        let globalFuture = [];
+        let globalCompleted = [];
+        
+        let activeManagerTab = 'dashboard';
+        let allManagers = []; 
+        
+        let publicProfileManager = null;
+        let selectedServiceIndex = null;
+        let selectedDate = null;
+        let selectedTime = null;
+        let recoveryInterval = null;
+        
+        let pendingSpecialDates = [];
+        let currentRating = 0;
+
+        lucide.createIcons();
+        
+        window.addEventListener('load', () => {
+             const params = new URLSearchParams(window.location.search);
+             const managerId = params.get('u');
+             const reviewAppId = params.get('a');
+             const view = params.get('view');
+
+             if (view === 'review' && reviewAppId) {
+                 loadReviewView(reviewAppId);
+             } else if(managerId) {
+                 navigateTo('booking-public', managerId);
+             }
+             
+             loadWhatsappConfig();
+             fetchTestimonialsPublic(); // Fetch testimonials for home page
+             updateBrasiliaClock();
+             setInterval(updateBrasiliaClock, 60000);
+             
+             const now = new Date();
+             const month = (now.getMonth() + 1).toString().padStart(2, '0');
+             const year = now.getFullYear();
+             const earningFilter = document.getElementById('earnings-filter');
+             if(earningFilter) earningFilter.value = `${year}-${month}`;
+        });
+
+        // --- NAVIGATION ---
+        function navigateTo(viewId, param = null) {
+            document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
+            document.getElementById('view-' + viewId).classList.add('active');
+            document.getElementById('mobile-menu').classList.remove('open');
+            window.scrollTo(0,0);
+
+            if(viewId === 'developer-dashboard') { loadDeveloperData(); loadWhatsappConfig(); }
+            if(viewId === 'client') { loadClientArea(); }
+            if(viewId === 'manager') { 
+                if(!currentManager) { navigateTo('manager-login'); return; }
+                loadManagerDashboard(); 
+            }
+            if(viewId === 'manager-login') { loadSavedCredentials(); }
+            if(viewId === 'booking-public' && param) { loadPublicProfile(param); }
+            if(viewId === 'recovery') { initRecoveryAnimation(); } else { stopRecoveryAnimation(); }
+        }
+
+        // --- TESTIMONIALS LOGIC (PUBLIC) ---
+        async function fetchTestimonialsPublic() {
+            const listContainer = document.getElementById('testimonials-list');
+            
+            // Hardcoded fallbacks (per request)
+            const fallbackTestimonials = [
+                { name: "Mariana Silva", type: "Cliente", comment: "Agendar ficou muito mais fácil. Em poucos cliques já escolho o profissional e o horário. Simples e rápido!", rating: 5, photo: null },
+                { name: "Dr. Carlos Mendes", type: "Profissional", comment: "Hoje tenho total controle da minha agenda e dos meus horários. Mudou minha rotina.", rating: 5, photo: null },
+                { name: "Fernanda Costa", type: "Cliente", comment: "Nunca mais precisei trocar várias mensagens. O MarcAI Agenda resolveu tudo pra mim.", rating: 5, photo: null },
+                { name: "Estúdio Bella", type: "Profissional", comment: "Consigo organizar meus clientes, evitar conflitos e ganhar tempo.", rating: 5, photo: null },
+                { name: "Lucas Pereira", type: "Cliente", comment: "Interface linda e fácil de usar. Recomendo demais!", rating: 5, photo: null },
+                { name: "Barbearia Vip", type: "Profissional", comment: "Ferramenta essencial para quem atende por horário.", rating: 5, photo: null }
+            ];
+
+            let testimonials = [];
+
+            try {
+                const { data, error } = await supabase.from('testimonials').select('*').eq('is_active', true).order('created_at', {ascending: false});
+                if (!error && data && data.length > 0) {
+                    testimonials = data;
+                } else {
+                    // Use fallbacks if DB is empty or table doesn't exist yet
+                    testimonials = fallbackTestimonials;
+                }
+            } catch (e) {
+                testimonials = fallbackTestimonials;
+            }
+            
+            // Render logic
+            renderTestimonialsCarousel(testimonials);
+        }
+
+        function renderTestimonialsCarousel(items) {
+            const container = document.getElementById('testimonials-list');
+            if(!items || items.length === 0) {
+                container.innerHTML = '';
+                return;
+            }
+
+            // Ensure smooth infinite scroll loop
+            // 1. Create a base list that is long enough to cover large screens width
+            let baseList = [...items];
+            while (baseList.length < 6) {
+                baseList = [...baseList, ...items];
+            }
+
+            // 2. Duplicate the base list exactly once to create the seamless loop pair
+            // When animation translates -50%, we are at the start of the second half, which is identical to the start
+            const displayItems = [...baseList, ...baseList];
+
+            // 3. Set Dynamic Animation Duration based on total items to keep speed consistent
+            // Approx 10 seconds per item pair set seems reasonable speed
+            const duration = Math.max(30, baseList.length * 8); 
+            container.style.animationDuration = `${duration}s`;
+
+            const html = displayItems.map(item => {
+                const stars = Array(5).fill(0).map(() => `<i data-lucide="star" class="w-3 h-3 fill-yellow-400 text-yellow-400"></i>`).join('');
+                return `
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 min-w-[300px] max-w-[300px] flex flex-col justify-between h-full">
+                    <div class="flex items-center gap-1 mb-3">${stars}</div>
+                    <p class="text-sm text-slate-600 italic mb-6">"${item.comment}"</p>
+                    <div class="flex items-center gap-3 mt-auto">
+                        <div class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center overflow-hidden border border-slate-200">
+                             ${item.photo_url ? `<img src="${item.photo_url}" class="w-full h-full object-cover">` : `<span class="text-slate-400 font-bold text-xs">${item.name.charAt(0)}</span>`}
+                        </div>
+                        <div>
+                            <div class="text-sm font-bold text-slate-900">${item.name}</div>
+                            <div class="text-[10px] uppercase font-bold tracking-wide ${item.type === 'Profissional' || item.user_type === 'Profissional' ? 'text-blue-600' : 'text-slate-400'}">${item.type || item.user_type}</div>
+                        </div>
+                    </div>
+                </div>
+                `;
+            }).join('');
+            
+            container.innerHTML = html;
+            lucide.createIcons();
+        }
+
+        function handleManagerNavigation() {
+            if(currentManager) navigateTo('manager'); else navigateTo('manager-login');
+        }
+
+        // --- LIGHTBOX ---
+        function openLightbox(src) {
+            const lb = document.getElementById('lightbox');
+            const img = document.getElementById('lightbox-img');
+            img.src = src;
+            lb.classList.remove('hidden');
+            setTimeout(() => { img.classList.remove('scale-95'); img.classList.add('scale-100'); }, 10);
+        }
+        function closeLightbox() {
+            const lb = document.getElementById('lightbox');
+            const img = document.getElementById('lightbox-img');
+            img.classList.remove('scale-100'); img.classList.add('scale-95');
+            setTimeout(() => { lb.classList.add('hidden'); img.src = ''; }, 300);
+        }
+
+        // --- MANAGER DASHBOARD ---
+        function switchManagerTab(tab) {
+            activeManagerTab = tab;
+            document.querySelectorAll('.manager-tab').forEach(btn => {
+                btn.classList.remove('text-blue-800', 'border-b-2', 'border-blue-800');
+                btn.classList.add('text-slate-500');
+            });
+            document.getElementById('tab-' + tab).classList.add('text-blue-800', 'border-b-2', 'border-blue-800');
+            document.getElementById('tab-' + tab).classList.remove('text-slate-500');
+            
+            document.querySelectorAll('.manager-tab-content').forEach(el => el.classList.add('hidden'));
+            document.getElementById('content-' + tab).classList.remove('hidden');
+
+            if(tab === 'dashboard') loadManagerAppointments();
+            if(tab === 'schedule') loadManagerScheduleUI();
+            if(tab === 'profile') loadManagerProfileUI();
+        }
+
+        function toggleScheduleSubTab(sub) {
+             const weekly = document.getElementById('schedule-weekly-content');
+             const special = document.getElementById('schedule-special-content');
+             const tabWeekly = document.getElementById('subtab-weekly');
+             const tabSpecial = document.getElementById('subtab-special');
+
+             if(sub === 'weekly') {
+                 weekly.classList.remove('hidden');
+                 special.classList.add('hidden');
+                 tabWeekly.className = "pb-2 text-sm font-bold text-blue-800 border-b-2 border-blue-800 transition-colors";
+                 tabSpecial.className = "pb-2 text-sm font-bold text-slate-400 hover:text-blue-800 transition-colors";
+             } else {
+                 weekly.classList.add('hidden');
+                 special.classList.remove('hidden');
+                 tabWeekly.className = "pb-2 text-sm font-bold text-slate-400 hover:text-blue-800 transition-colors";
+                 tabSpecial.className = "pb-2 text-sm font-bold text-blue-800 border-b-2 border-blue-800 transition-colors";
+             }
+        }
+
+        function loadManagerDashboard() {
+            if(!currentManager) return;
+            document.getElementById('manager-name-display').innerText = currentManager.name;
+            document.getElementById('manager-est-display').innerText = currentManager.establishment_name || 'Painel de Gestão';
+            
+            const link = window.location.origin + '?u=' + currentManager.id;
+            document.getElementById('manager-link-input').value = link;
+            
+            // Toggle Link Section based on Developer setting
+            const linkSection = document.getElementById('manager-link-section');
+            if (currentManager.enable_custom_link) {
+                linkSection.classList.remove('hidden');
+            } else {
+                linkSection.classList.add('hidden');
+            }
+
+            // Expiration Banner Logic
+            const exp = currentManager.expiration_days;
+            const banner = document.getElementById('expiration-banner');
+            const renewBtn = document.getElementById('btn-renew-plan');
+            
+            // Fetch WA number for renewal
+            const cleanNum = globalWhatsapp.replace(/\D/g, '');
+            const targetNum = cleanNum || "5511999999999";
+            const waLink = globalWhatsapp 
+                ? `https://wa.me/${targetNum}?text=${encodeURIComponent("Olá, gostaria de renovar meu plano na MarcAI Agenda.")}`
+                : "#";
+            renewBtn.href = waLink;
+
+            if (exp <= 7) {
+                banner.classList.remove('hidden');
+                document.getElementById('expiration-days-count').innerText = exp;
+            } else {
+                banner.classList.add('hidden');
+            }
+
+            switchManagerTab('dashboard');
+        }
+
+        function copyManagerLink() {
+            const input = document.getElementById('manager-link-input');
+            input.select();
+            navigator.clipboard.writeText(input.value);
+            alert('Link copiado!');
+        }
+
+        async function loadManagerAppointments() {
+            if(!currentManager) return;
+            
+            const loadingHtml = '<div class="text-center py-12"><i data-lucide="loader-2" class="w-6 h-6 animate-spin mx-auto text-blue-800"></i></div>';
+            document.getElementById('list-today').innerHTML = loadingHtml;
+            document.getElementById('list-future').innerHTML = loadingHtml;
+            document.getElementById('list-completed').innerHTML = loadingHtml;
+            lucide.createIcons();
+            
+            const { data, error } = await supabase.from('appointments')
+                .select('*')
+                .eq('manager_id', currentManager.id)
+                .order('appointment_time', { ascending: true });
+
+            if(error || !data) {
+                const errorHtml = '<div class="text-center text-slate-400 py-4">Erro ao carregar.</div>';
+                document.getElementById('list-today').innerHTML = errorHtml;
+                document.getElementById('list-future').innerHTML = errorHtml;
+                document.getElementById('list-completed').innerHTML = errorHtml;
+                return;
+            }
+
+            organizeAppointments(data);
+            updateEarnings(data);
+        }
+
+        async function organizeAppointments(data) {
+            const todayStr = new Date().toDateString();
+            const now = new Date();
+            now.setHours(0,0,0,0);
+
+            globalToday = [];
+            globalFuture = [];
+            globalCompleted = [];
+
+            // Fetch Reviews for completed appointments
+            const completedIds = data.filter(a => a.status === 'completed').map(a => a.id);
+            let reviewsMap = {};
+            if (completedIds.length > 0) {
+                const { data: reviews } = await supabase.from('reviews').select('*').in('appointment_id', completedIds);
+                if (reviews) {
+                    reviews.forEach(r => reviewsMap[r.appointment_id] = r);
+                }
+            }
+
+            data.forEach(app => {
+                if (app.status === 'cancelled') return;
+
+                if (app.status === 'completed') {
+                    app.review = reviewsMap[app.id]; // Attach review
+                    globalCompleted.push(app);
+                    return;
+                }
+
+                const appDate = new Date(app.appointment_time);
+                if (appDate.toDateString() === todayStr) {
+                    globalToday.push(app);
+                } else if (appDate > now) {
+                    globalFuture.push(app);
+                }
+            });
+
+            globalCompleted.sort((a,b) => new Date(b.appointment_time) - new Date(a.appointment_time));
+
+            renderTodayAppointments();
+            renderFutureAppointments(); 
+            renderCompletedAppointments();
+        }
+
+        function createAppointmentCard(app, isCompletedList = false) {
+            const date = new Date(app.appointment_time);
+            const dateStr = date.toLocaleDateString('pt-BR');
+            const timeStr = date.toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'});
+            const isConfirmed = app.status === 'confirmed';
+            
+            let actionButtons = '';
+            let reviewHtml = '';
+            
+            if (isCompletedList) {
+                 actionButtons = `<span class="text-green-600 font-bold text-sm border border-green-200 px-3 py-1 rounded bg-green-50 flex items-center gap-1"><i data-lucide="check-circle" class="w-3 h-3"></i> Concluído</span>`;
+                 // Reviews visible only if manager has review system enabled
+                 if (currentManager.enable_reviews && app.review) {
+                     const stars = Array(5).fill(0).map((_, i) => 
+                        `<i data-lucide="star" class="w-3 h-3 ${i < app.review.rating ? 'fill-yellow-400 text-yellow-400' : 'text-slate-300'}"></i>`
+                     ).join('');
+                     
+                     reviewHtml = `
+                        <div class="mt-3 pt-3 border-t border-slate-100">
+                            <div class="flex items-center gap-1 mb-1">${stars}</div>
+                            ${app.review.comment ? `<p class="text-xs text-slate-600 italic">"${app.review.comment}"</p>` : ''}
+                            ${app.review.photo_url ? `<div class="mt-2"><img src="${app.review.photo_url}" class="w-16 h-16 object-cover rounded-lg border border-slate-200 cursor-zoom-in" onclick="openLightbox('${app.review.photo_url}')"></div>` : ''}
+                        </div>
+                     `;
+                 } else if (currentManager.enable_reviews) {
+                     reviewHtml = `<div class="mt-3 pt-3 border-t border-slate-100 text-xs text-slate-400 italic">Cliente ainda não avaliou.</div>`;
+                 }
+            } else if (isConfirmed) {
+                 actionButtons = `
+                     <div class="flex items-center gap-2">
+                         <span class="text-amber-600 font-bold text-xs border border-amber-200 px-3 py-1.5 rounded bg-amber-50 flex items-center gap-1"><i data-lucide="clock" class="w-3 h-3"></i> Aguardando Conclusão</span>
+                         <button onclick="completeAppointment(${app.id}, '${app.client_phone}', '${app.client_name}')" class="bg-blue-600 text-white px-3 py-2 rounded-lg text-xs font-bold hover:bg-blue-700 flex items-center gap-1 shadow-sm"><i data-lucide="dollar-sign" class="w-3 h-3"></i> Concluir</button>
+                         <button onclick="cancelAppointment(${app.id})" class="bg-white text-red-600 border border-red-200 px-3 py-2 rounded-lg text-xs font-bold hover:bg-red-50">Cancelar</button>
+                    </div>`;
+            } else {
+                actionButtons = `
+                    <button onclick="acceptAppointment(${app.id}, '${app.client_phone}', '${app.client_name}', '${app.service_name}', '${dateStr}', '${timeStr}', '${app.service_price}')" class="bg-green-600 text-white px-3 py-2 rounded-lg text-xs font-bold hover:bg-green-700 flex items-center gap-1 shadow-sm"><i data-lucide="check" class="w-3 h-3"></i> Aceitar</button>
+                    <button onclick="completeAppointment(${app.id}, '${app.client_phone}', '${app.client_name}')" class="bg-blue-600 text-white px-3 py-2 rounded-lg text-xs font-bold hover:bg-blue-700 flex items-center gap-1 shadow-sm"><i data-lucide="dollar-sign" class="w-3 h-3"></i> Concluir</button>
+                    <button onclick="cancelAppointment(${app.id})" class="bg-white text-red-600 border border-red-200 px-3 py-2 rounded-lg text-xs font-bold hover:bg-red-50">Cancelar</button>
+                `;
+            }
+
+            return `
+            <div class="bg-white border border-slate-200 rounded-xl p-4 flex flex-col md:flex-row justify-between items-start gap-4 ${isCompletedList ? 'opacity-90 bg-slate-50' : 'shadow-sm hover:shadow-md transition-shadow'}">
+                <div class="flex-1 w-full">
+                    <div class="flex items-center gap-2 mb-1"><span class="font-bold text-slate-900 text-lg">${app.client_name}</span><span class="text-xs bg-blue-50 text-blue-800 px-2 py-0.5 rounded font-medium">${app.service_name}</span></div>
+                    <div class="text-sm text-slate-600 flex items-center gap-4"><div class="flex items-center gap-1"><i data-lucide="calendar" class="w-3 h-3 text-slate-400"></i> ${dateStr}</div><div class="flex items-center gap-1"><i data-lucide="clock" class="w-3 h-3 text-slate-400"></i> ${timeStr}</div><div class="font-bold text-green-600">R$ ${app.service_price}</div></div>
+                    ${reviewHtml}
+                </div>
+                <div class="flex gap-2 self-start">${actionButtons}</div>
+            </div>`;
+        }
+
+        function renderTodayAppointments() {
+            const container = document.getElementById('list-today');
+            if(globalToday.length === 0) {
+                container.innerHTML = '<div class="text-center py-8 bg-slate-50 rounded-xl border border-dashed border-slate-200 text-slate-400 text-sm">Nada agendado para hoje.</div>';
+                return;
+            }
+            container.innerHTML = globalToday.map(app => createAppointmentCard(app)).join('');
+            lucide.createIcons();
+        }
+
+        function renderFutureAppointments() {
+            const container = document.getElementById('list-future');
+            const filterDateVal = document.getElementById('future-filter-date').value;
+            let displayList = [];
+
+            if (filterDateVal) {
+                const [y, m, d] = filterDateVal.split('-').map(Number);
+                displayList = globalFuture.filter(app => {
+                    const appD = new Date(app.appointment_time);
+                    return appD.getFullYear() === y && (appD.getMonth() + 1) === m && appD.getDate() === d;
+                });
+            } else {
+                 const limit = new Date();
+                 limit.setDate(limit.getDate() + 15);
+                 displayList = globalFuture.filter(app => new Date(app.appointment_time) <= limit);
+            }
+
+            if(displayList.length === 0) {
+                container.innerHTML = '<div class="text-center py-8 bg-slate-50 rounded-xl border border-dashed border-slate-200 text-slate-400 text-sm">Nenhum agendamento encontrado (Próx. 15 dias ou Data selecionada).</div>';
+                return;
+            }
+            container.innerHTML = displayList.map(app => createAppointmentCard(app)).join('');
+            lucide.createIcons();
+        }
+
+        function renderCompletedAppointments() {
+            const container = document.getElementById('list-completed');
+            if(globalCompleted.length === 0) {
+                container.innerHTML = '<div class="text-center py-8 bg-slate-50 rounded-xl border border-dashed border-slate-200 text-slate-400 text-sm">Histórico vazio.</div>';
+                return;
+            }
+            container.innerHTML = globalCompleted.map(app => createAppointmentCard(app, true)).join('');
+            lucide.createIcons();
+        }
+
+        function refreshEarningsFromUI() {
+            if(currentManager) {
+                 supabase.from('appointments').select('*').eq('manager_id', currentManager.id).then(({ data }) => { if(data) updateEarnings(data); });
+            }
+        }
+
+        function updateEarnings(appointments) {
+            const completed = appointments.filter(a => a.status === 'completed');
+            const pending = appointments.filter(a => a.status === 'pending' || a.status === 'confirmed').length;
+
+            const todayStr = new Date().toDateString();
+            const todayTotal = completed
+                .filter(a => new Date(a.appointment_time).toDateString() === todayStr)
+                .reduce((sum, a) => sum + Number(a.service_price), 0);
+
+            const filterInput = document.getElementById('earnings-filter');
+            let total = 0;
+            
+            if (filterInput && filterInput.value) {
+                const [year, month] = filterInput.value.split('-');
+                total = completed
+                    .filter(a => {
+                        const d = new Date(a.appointment_time);
+                        return d.getFullYear() === parseInt(year) && (d.getMonth() + 1) === parseInt(month);
+                    })
+                    .reduce((sum, a) => sum + Number(a.service_price), 0);
+            } else {
+                total = completed.reduce((sum, a) => sum + Number(a.service_price), 0);
+            }
+
+            document.getElementById('dash-earnings-total').innerText = 'R$ ' + total.toFixed(2).replace('.',',');
+            document.getElementById('dash-earnings-today').innerText = 'R$ ' + todayTotal.toFixed(2).replace('.',',');
+            document.getElementById('dash-pending-count').innerText = pending;
+        }
+
+        window.acceptAppointment = async (id, phone, name, service, date, time, price) => {
+             const num = phone.replace(/\D/g, '');
+             const estName = currentManager.establishment_name || currentManager.name;
+             const msg = `Olá ${name}! Aqui é do ${estName}. Seu agendamento para ${service} no dia ${date} às ${time} (Valor: R$ ${price}) está Confirmado!`;
+             window.open(`https://wa.me/${num}?text=${encodeURIComponent(msg)}`, '_blank');
+             await supabase.from('appointments').update({ status: 'confirmed' }).eq('id', id);
+             loadManagerAppointments(); 
+        };
+
+        window.completeAppointment = async (id, phone, name) => {
+            // Logic depending on enable_reviews flag
+            if (currentManager.enable_reviews) {
+                if(!confirm("Concluir atendimento? O cliente receberá o link de avaliação.")) return;
+                
+                await supabase.from('appointments').update({ status: 'completed' }).eq('id', id);
+                
+                // Send Review Link via WhatsApp
+                const num = phone.replace(/\D/g, '');
+                const reviewLink = window.location.origin + `?view=review&a=${id}`;
+                const msg = `Olá ${name}! Agradecemos a preferência! 😊\n\nPor favor, avalie seu atendimento clicando aqui: ${reviewLink}`;
+                
+                window.open(`https://wa.me/${num}?text=${encodeURIComponent(msg)}`, '_blank');
+            } else {
+                if(!confirm("Concluir atendimento?")) return;
+                await supabase.from('appointments').update({ status: 'completed' }).eq('id', id);
+            }
+            loadManagerAppointments(); 
+        };
+
+        window.cancelAppointment = async (id) => {
+            if(!confirm("Tem certeza que deseja cancelar? O horário ficará livre.")) return;
+            await supabase.from('appointments').update({ status: 'cancelled' }).eq('id', id);
+            loadManagerAppointments(); 
+        };
+
+        // --- REVIEWS ---
+        async function loadReviewView(appointmentId) {
+            document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
+            document.getElementById('view-review').classList.add('active');
+            document.getElementById('review-appointment-id').value = appointmentId;
+            lucide.createIcons(); // Ensure icons are rendered in this view when loaded
+        }
+
+        window.setRating = (r) => {
+            currentRating = r;
+            const svgs = document.querySelectorAll('.star-rating svg'); 
+            svgs.forEach((star, idx) => {
+                if (idx < r) {
+                    star.classList.remove('text-slate-300');
+                    star.classList.add('text-yellow-400', 'fill-yellow-400');
+                } else {
+                    star.classList.add('text-slate-300');
+                    star.classList.remove('text-yellow-400', 'fill-yellow-400');
+                }
+            });
+            document.getElementById('rating-feedback').innerText = r + '/5 Estrelas';
+        };
+
+        document.getElementById('review-photo').addEventListener('change', function(e) {
+            if (e.target.files[0]) document.getElementById('review-file-name').innerText = e.target.files[0].name;
+        });
+
+        document.getElementById('review-form').onsubmit = async (e) => {
+            e.preventDefault();
+            const btn = e.target.querySelector('button');
+            const appId = document.getElementById('review-appointment-id').value;
+            const comment = document.getElementById('review-comment').value;
+            const fileInput = document.getElementById('review-photo');
+            
+            if (currentRating === 0) return alert('Por favor, selecione uma nota de estrelas.');
+
+            btn.disabled = true;
+            btn.innerText = 'Enviando...';
+
+            let photoUrl = null;
+            if (fileInput.files && fileInput.files[0]) {
+                const file = fileInput.files[0];
+                const toBase64 = file => new Promise((resolve, reject) => { const reader = new FileReader(); reader.readAsDataURL(file); reader.onload = () => resolve(reader.result); reader.onerror = error => reject(error); });
+                try { photoUrl = await toBase64(file); } catch(e) {}
+            }
+
+            const { error } = await supabase.from('reviews').insert([{
+                appointment_id: appId,
+                rating: currentRating,
+                comment: comment,
+                photo_url: photoUrl
+            }]);
+
+            if (error) {
+                alert('Erro ao enviar avaliação.');
+                btn.disabled = false;
+                btn.innerText = 'Enviar Avaliação';
+            } else {
+                alert('Obrigado pela sua avaliação!');
+                window.location.href = window.location.origin; // Go back home
+            }
+        };
+
+        // --- PUBLIC PROFILE & BOOKING ---
+        async function loadPublicProfile(managerId) {
+            const container = document.getElementById('public-profile-content');
+            container.innerHTML = '<div class="text-center py-20"><i data-lucide="loader-2" class="w-8 h-8 animate-spin mx-auto text-blue-800"></i></div>';
+            lucide.createIcons();
+
+            // 1. Fetch Manager
+            const { data: manager, error } = await supabase.from('managers').select('*').eq('id', managerId).single();
+            if(error || !manager) {
+                container.innerHTML = '<div class="text-center py-20 text-red-500">Profissional não encontrado.</div>';
+                return;
+            }
+
+            publicProfileManager = manager;
+
+            // 2. Reviews Logic: Fetch only if enabled
+            let reviews = [];
+            if (manager.enable_reviews) {
+                const { data: appointments } = await supabase.from('appointments').select('id, client_name').eq('manager_id', managerId);
+                const appIds = appointments ? appointments.map(a => a.id) : [];
+                
+                if(appIds.length > 0) {
+                    const { data: reviewsData } = await supabase.from('reviews').select('*').in('appointment_id', appIds).order('created_at', { ascending: false });
+                    if(reviewsData) {
+                        reviews = reviewsData.map(r => {
+                            const app = appointments.find(a => a.id === r.appointment_id);
+                            return { ...r, client_name: app ? app.client_name : 'Cliente' };
+                        });
+                    }
+                }
+            }
+
+            renderBookingStep1(reviews);
+        }
+
+        function renderBookingStep1(reviews = []) {
+            const m = publicProfileManager;
+            const container = document.getElementById('public-profile-content');
+            const services = m.services || [];
+            
+            // Rating Badge HTML (Conditional)
+            let ratingBadgeHtml = '';
+            if (m.enable_reviews) {
+                const totalReviews = reviews.length;
+                const averageRating = totalReviews > 0 
+                    ? (reviews.reduce((sum, r) => sum + r.rating, 0) / totalReviews).toFixed(1) 
+                    : "5.0"; 
+                ratingBadgeHtml = `
+                    <div class="absolute top-4 right-4 bg-white/90 backdrop-blur px-3 py-1.5 rounded-full shadow-sm text-xs font-bold text-slate-700 flex items-center gap-1 border border-slate-100">
+                        <i data-lucide="star" class="w-3 h-3 text-yellow-400 fill-yellow-400"></i>
+                        <span>${averageRating} (${totalReviews})</span>
+                    </div>`;
+            }
+
+            // Address Link logic
+            const addressHtml = m.address ? 
+                `<a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(m.address)}" target="_blank" class="flex items-center justify-center gap-1 mt-3 text-slate-500 text-xs hover:text-blue-800 transition-colors">
+                    <i data-lucide="map-pin" class="w-3 h-3"></i> ${m.address}
+                </a>` : '';
+
+            // Reviews Placeholder (Carousel will be injected here)
+            let reviewsSection = '';
+            if (m.enable_reviews && reviews.length > 0) {
+                reviewsSection = `<div id="profile-reviews-wrapper" class="mb-10 mt-8"></div>`;
+            }
+
+            container.innerHTML = `
+                <div class="step-content">
+                    <div class="bg-white rounded-2xl p-6 shadow-lg border border-slate-100 mb-6 text-center relative overflow-hidden">
+                         ${ratingBadgeHtml}
+                         
+                         <div id="brasilia-clock" class="text-xs text-slate-400 font-mono mb-2">Carregando relógio...</div>
+                         <div class="w-20 h-20 bg-slate-100 rounded-full mx-auto mb-3 overflow-hidden border border-slate-200">
+                            ${m.photo_url ? `<img src="${m.photo_url}" class="w-full h-full object-cover">` : `<div class="flex items-center justify-center h-full text-slate-300"><i data-lucide="user" class="w-8 h-8"></i></div>`}
+                         </div>
+                         <h1 class="text-2xl font-bold text-slate-900">${m.name}</h1>
+                         <div class="text-blue-800 font-medium text-sm mb-1">${m.establishment_name || 'Estabelecimento'}</div>
+                         <div class="inline-block bg-slate-100 text-slate-600 text-xs px-2 py-0.5 rounded-full">${m.specialty || 'Profissional'}</div>
+                         ${addressHtml}
+                    </div>
+                    
+                    ${reviewsSection}
+
+                    <h3 class="text-lg font-bold text-slate-900 mb-4 px-2">1. Selecione um Serviço</h3>
+                    <div class="space-y-3">
+                        ${services.length === 0 ? '<div class="text-slate-400 italic text-center">Nenhum serviço disponível.</div>' : ''}
+                        ${services.map((svc, idx) => `
+                            <div onclick="selectService(${idx})" class="bg-white border-2 border-slate-100 hover:border-blue-400 rounded-xl p-4 cursor-pointer transition-all flex justify-between items-center group">
+                                <div><div class="font-bold text-slate-900">${svc.name}</div><div class="text-xs text-slate-500">${svc.duration} min</div></div>
+                                <div class="font-bold text-blue-800">R$ ${svc.price}</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+            lucide.createIcons();
+            updateBrasiliaClock();
+
+            // Initialize Reviews Carousel if applicable
+            if (m.enable_reviews && reviews.length > 0) {
+                renderProfileReviewsCarousel(reviews);
+            }
+        }
+
+        function renderProfileReviewsCarousel(reviews) {
+            const wrapper = document.getElementById('profile-reviews-wrapper');
+            if(!wrapper) return;
+
+            // HTML Structure identical to Home Page Scroller
+            let html = `<h3 class="text-sm font-bold text-slate-900 mb-4 px-2 flex items-center gap-2"><i data-lucide="message-square" class="w-4 h-4 text-blue-800"></i> O que dizem os clientes</h3>`;
+            html += `<div class="scroller" data-animated="true"><div class="scroller__inner" id="profile-scroller-inner"></div></div>`;
+            wrapper.innerHTML = html;
+
+            const listContainer = document.getElementById('profile-scroller-inner');
+
+            // 1. Create base list (fill width)
+            let baseList = [...reviews];
+            while (baseList.length < 6) { baseList = [...baseList, ...reviews]; }
+            
+            // 2. Duplicate for seamless loop
+            const displayItems = [...baseList, ...baseList];
+
+            // 3. Dynamic Speed
+            const duration = Math.max(30, baseList.length * 8); 
+            listContainer.style.animationDuration = `${duration}s`;
+
+            // 4. Render Cards (Using Home Page Style)
+            listContainer.innerHTML = displayItems.map(r => {
+                const stars = Array(5).fill(0).map(() => `<i data-lucide="star" class="w-3 h-3 fill-yellow-400 text-yellow-400"></i>`).join('');
+                return `
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 min-w-[300px] max-w-[300px] flex flex-col justify-between h-full text-left">
+                    <div class="flex items-center gap-1 mb-3">${stars}</div>
+                    <p class="text-sm text-slate-600 italic mb-6 line-clamp-4">"${r.comment || 'Sem comentário.'}"</p>
+                    <div class="flex items-center gap-3 mt-auto">
+                        <div class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center overflow-hidden border border-slate-200">
+                             ${r.photo_url ? `<img src="${r.photo_url}" class="w-full h-full object-cover">` : `<span class="text-slate-400 font-bold text-xs">${r.client_name.charAt(0)}</span>`}
+                        </div>
+                        <div>
+                            <div class="text-sm font-bold text-slate-900">${r.client_name}</div>
+                            <div class="text-[10px] uppercase font-bold tracking-wide text-slate-400">Cliente Verificado</div>
+                        </div>
+                    </div>
+                </div>
+                `;
+            }).join('');
+            
+            lucide.createIcons();
+        }
+
+        window.selectService = (idx) => { selectedServiceIndex = idx; renderBookingStep2(); };
+
+        function renderBookingStep2() {
+            const container = document.getElementById('public-profile-content');
+            const days = [];
+            const today = getBrasiliaDate();
+            for(let i=0; i<30; i++) { 
+                const d = new Date(today); 
+                d.setDate(today.getDate() + i); 
+                days.push(d); 
+            }
+
+            container.innerHTML = `
+                <div class="step-content">
+                    <button onclick="renderBookingStep1()" class="text-sm text-slate-500 hover:text-blue-800 mb-4 flex items-center gap-1"><i data-lucide="arrow-left" class="w-4 h-4"></i> Voltar</button>
+                    <h3 class="text-lg font-bold text-slate-900 mb-2 px-2">2. Escolha a Data</h3>
+                    <div class="flex overflow-x-auto gap-3 pb-4 mb-6 custom-scroll px-2" id="date-scroll">
+                        ${days.map((d) => {
+                            const offset = d.getTimezoneOffset();
+                            const localDate = new Date(d.getTime() - (offset*60*1000));
+                            const dateIsoStr = localDate.toISOString().split('T')[0];
+
+                            const isSelected = selectedDate && dateIsoStr === selectedDate.toISOString().split('T')[0];
+                            const dayName = d.toLocaleDateString('pt-BR', {weekday: 'short'}).replace('.','');
+                            const dayNum = d.getDate();
+                            return `<div onclick="selectDate('${dateIsoStr}')" class="min-w-[70px] flex flex-col items-center justify-center p-3 rounded-xl border-2 cursor-pointer transition-all ${isSelected ? 'border-blue-800 bg-blue-50' : 'border-slate-100 bg-white hover:border-blue-300'}"><span class="text-xs uppercase font-bold ${isSelected ? 'text-blue-800' : 'text-slate-400'}">${dayName}</span><span class="text-lg font-bold ${isSelected ? 'text-blue-700' : 'text-slate-800'}">${dayNum}</span></div>`;
+                        }).join('')}
+                    </div>
+                    <div id="time-slots-container"><div class="text-center text-slate-400 text-sm py-8 bg-slate-50 rounded-xl border border-dashed border-slate-200">Selecione uma data acima para ver os horários.</div></div>
+                </div>
+            `;
+            lucide.createIcons();
+        }
+
+        window.selectDate = (dateStr) => { 
+            const parts = dateStr.split('-');
+            selectedDate = new Date(parts[0], parts[1] - 1, parts[2]); 
+            selectedTime = null; 
+            renderBookingStep2(); 
+            generateTimeSlots(); 
+        };
+
+        async function generateTimeSlots() {
+            const container = document.getElementById('time-slots-container');
+            container.innerHTML = '<div class="text-center py-8"><i data-lucide="loader-2" class="w-6 h-6 animate-spin mx-auto text-blue-800"></i></div>';
+            lucide.createIcons();
+
+            const m = publicProfileManager;
+            const svc = m.services[selectedServiceIndex];
+            
+            const dateStr = selectedDate.toISOString().split('T')[0];
+            const special = (m.working_hours && m.working_hours.special) ? m.working_hours.special : [];
+            const specialRule = special.find(s => s.date === dateStr);
+
+            let config = null;
+            if(specialRule) {
+                if(specialRule.closed) {
+                     container.innerHTML = '<div class="text-center text-red-400 py-8 text-sm">Não haverá atendimento nesta data (Folga/Feriado).</div>'; return; 
+                }
+                config = { open: true, start: specialRule.start, end: specialRule.end };
+            } else {
+                const dayIdx = selectedDate.getDay();
+                config = m.working_hours ? m.working_hours[dayIdx] : null;
+            }
+
+            if(!config || !config.open) { container.innerHTML = '<div class="text-center text-slate-500 py-8">Profissional não atende neste dia.</div>'; return; }
+
+            const { data: apps } = await supabase.from('appointments').select('appointment_time, service_duration').eq('manager_id', m.id).neq('status', 'cancelled');
+
+            const slots = [];
+            const [startH, startM] = config.start.split(':').map(Number);
+            const [endH, endM] = config.end.split(':').map(Number);
+            
+            let current = new Date(selectedDate); current.setHours(startH, startM, 0, 0);
+            const endTime = new Date(selectedDate); endTime.setHours(endH, endM, 0, 0);
+            
+            const lunch = m.working_hours.lunch;
+            let lunchStart, lunchEnd;
+            if(lunch && lunch.active) {
+                const [lsH, lsM] = lunch.start.split(':').map(Number);
+                const [leH, leM] = lunch.end.split(':').map(Number);
+                lunchStart = new Date(selectedDate); lunchStart.setHours(lsH, lsM, 0, 0);
+                lunchEnd = new Date(selectedDate); lunchEnd.setHours(leH, leM, 0, 0);
+            }
+            
+            const now = getBrasiliaDate();
+
+            while(current < endTime) {
+                if(selectedDate.toDateString() === now.toDateString() && current < now) { current.setMinutes(current.getMinutes() + parseInt(svc.duration)); continue; }
+                
+                if(lunch && lunch.active && current >= lunchStart && current < lunchEnd) { current.setMinutes(current.getMinutes() + parseInt(svc.duration)); continue; }
+                
+                let isTaken = false;
+                if(apps) {
+                    const slotEnd = new Date(current); slotEnd.setMinutes(slotEnd.getMinutes() + parseInt(svc.duration));
+                    for(const app of apps) {
+                        const appStart = new Date(app.appointment_time);
+                        const appEnd = new Date(appStart); appEnd.setMinutes(appEnd.getMinutes() + app.service_duration);
+                        if(current < appEnd && slotEnd > appStart) { isTaken = true; break; }
+                    }
+                }
+                if(!isTaken) slots.push(new Date(current));
+                current.setMinutes(current.getMinutes() + parseInt(svc.duration));
+            }
+
+            if(slots.length === 0) { container.innerHTML = '<div class="text-center text-slate-500 py-8">Sem horários disponíveis.</div>'; return; }
+
+            container.innerHTML = `<h3 class="text-lg font-bold text-slate-900 mb-2 px-2">3. Escolha o Horário</h3><div class="grid grid-cols-4 gap-2">${slots.map(s => { const timeStr = s.toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'}); return `<button onclick="selectTime('${s.toISOString()}')" class="py-2 rounded-lg text-sm font-semibold border bg-white border-slate-200 hover:border-blue-500 hover:text-blue-800 transition-colors">${timeStr}</button>`; }).join('')}</div>`;
+        }
+
+        window.selectTime = (timeIso) => { selectedTime = new Date(timeIso); renderBookingStep3(); };
+
+        function renderBookingStep3() {
+            const m = publicProfileManager;
+            const svc = m.services[selectedServiceIndex];
+            const dateStr = selectedDate.toLocaleDateString('pt-BR');
+            const timeStr = selectedTime.toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'});
+            const container = document.getElementById('public-profile-content');
+            container.innerHTML = `
+                 <div class="step-content">
+                    <button onclick="renderBookingStep2()" class="text-sm text-slate-500 hover:text-blue-800 mb-4 flex items-center gap-1"><i data-lucide="arrow-left" class="w-4 h-4"></i> Voltar</button>
+                    <div class="bg-blue-50 rounded-xl p-4 border border-blue-100 mb-6">
+                        <h4 class="font-bold text-slate-900 mb-2">Resumo</h4>
+                        <div class="flex justify-between text-sm mb-1"><span>Serviço:</span> <span class="font-medium">${svc.name}</span></div>
+                        <div class="flex justify-between text-sm mb-1"><span>Data:</span> <span class="font-medium">${dateStr} às ${timeStr}</span></div>
+                        <div class="flex justify-between text-sm border-t border-blue-200 pt-2 mt-2"><span>Valor:</span> <span class="font-bold text-blue-700">R$ ${svc.price}</span></div>
+                    </div>
+                    <form id="booking-final-form" onsubmit="confirmBooking(event)" class="space-y-4">
+                        <div><label class="block text-xs font-bold text-slate-700 mb-1">Nome Completo</label><input type="text" id="client-name" required class="w-full px-4 py-3 rounded-lg border border-slate-200 text-sm"></div>
+                        <div><label class="block text-xs font-bold text-slate-700 mb-1">WhatsApp</label><input type="tel" id="client-phone" required placeholder="(00) 00000-0000" class="w-full px-4 py-3 rounded-lg border border-slate-200 text-sm"></div>
+                        <div><label class="block text-xs font-bold text-slate-700 mb-1">Obs (Opcional)</label><textarea id="client-obs" rows="2" class="w-full px-4 py-3 rounded-lg border border-slate-200 text-sm resize-none"></textarea></div>
+                        <div class="space-y-3 pt-2">
+                             ${svc.policy ? `<label class="flex items-start gap-3 cursor-pointer p-3 bg-slate-50 rounded-lg border border-slate-100"><input type="checkbox" required class="mt-1 w-4 h-4 text-blue-800"><span class="text-xs text-slate-600">Ciente da política: <b>${svc.policy}</b></span></label>` : ''}
+                             <label class="flex items-start gap-3 cursor-pointer p-3 bg-green-50 rounded-lg border border-green-100"><input type="checkbox" required class="mt-1 w-4 h-4 text-green-600"><span class="text-xs text-green-800 font-medium">Estou ciente que serei direcionado ao WhatsApp do profissional.</span></label>
+                        </div>
+                        <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-4 rounded-xl shadow-lg shadow-green-600/20 text-sm flex items-center justify-center gap-2"><i data-lucide="message-circle" class="w-5 h-5"></i> Confirmar Agendamento</button>
+                    </form>
+                 </div>
+            `;
+            lucide.createIcons();
+        }
+
+        async function confirmBooking(e) {
+            e.preventDefault();
+            const btn = e.target.querySelector('button'); 
+            const originalText = btn.innerHTML; 
+            btn.disabled = true; 
+            btn.innerHTML = '<i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i> Processando...';
+            lucide.createIcons();
+
+            const name = document.getElementById('client-name').value;
+            const phone = document.getElementById('client-phone').value;
+            const notes = document.getElementById('client-obs').value;
+            const svc = publicProfileManager.services[selectedServiceIndex];
+
+            try {
+                if (!publicProfileManager.contact_whatsapp) {
+                    throw new Error("Este profissional não configurou um número de WhatsApp.");
+                }
+
+                const { error } = await supabase.from('appointments').insert([{
+                    manager_id: publicProfileManager.id, 
+                    client_name: name, 
+                    client_phone: phone, 
+                    service_name: svc.name, 
+                    service_price: svc.price, 
+                    service_duration: svc.duration, 
+                    appointment_time: selectedTime.toISOString(), 
+                    status: 'pending', 
+                    notes: notes
+                }]);
+                
+                if(error) throw error;
+                
+                const dateStr = selectedDate.toLocaleDateString('pt-BR');
+                const timeStr = selectedTime.toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'});
+                const professionalNum = publicProfileManager.contact_whatsapp.replace(/\D/g, '');
+                const msg = `Olá! Realizei um agendamento com a ${publicProfileManager.establishment_name || publicProfileManager.name} pelo MarcAI Agenda.\n\n*Serviço:* ${svc.name}\n*Data:* ${dateStr} às ${timeStr}\n*Cliente:* ${name}\n*Obs:* ${notes || '-'}`;
+                const waLink = `https://wa.me/${professionalNum}?text=${encodeURIComponent(msg)}`;
+
+                btn.innerHTML = '<i data-lucide="check" class="w-5 h-5"></i> Redirecionando...';
+                lucide.createIcons();
+
+                setTimeout(() => {
+                    window.open(waLink, '_blank');
+                    const container = document.getElementById('public-profile-content');
+                    container.innerHTML = `
+                        <div class="text-center py-12 px-4 animate-fade-in">
+                            <div class="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-sm"><i data-lucide="check" class="w-10 h-10"></i></div>
+                            <h3 class="text-2xl font-bold text-slate-900 mb-2">Agendamento Enviado!</h3>
+                            <p class="text-slate-600 mb-8 max-w-xs mx-auto">Sua solicitação foi registrada. Finalize a conversa no WhatsApp para confirmar.</p>
+                            <a href="${waLink}" target="_blank" class="inline-flex items-center gap-2 bg-[#25D366] text-white px-6 py-3 rounded-xl font-bold hover:bg-green-600 transition-colors shadow-lg shadow-green-500/20"><i data-lucide="message-circle" class="w-5 h-5"></i> Ir para WhatsApp</a>
+                            <div class="mt-8"><button onclick="location.reload()" class="text-slate-400 text-sm hover:text-blue-800 underline">Fazer novo agendamento</button></div>
+                        </div>
+                    `;
+                    lucide.createIcons();
+                }, 1000);
+
+            } catch(err) { 
+                alert("Erro ao agendar: " + err.message); 
+                btn.disabled = false; 
+                btn.innerHTML = originalText; 
+            }
+        }
+        
+        // --- SCHEDULE & SPECIAL DATES ---
+        window.toggleDayInputs = (idx, isChecked) => {
+            const startInput = document.querySelector(`.day-start[data-day="${idx}"]`);
+            const endInput = document.querySelector(`.day-end[data-day="${idx}"]`);
+            if(startInput) startInput.disabled = !isChecked;
+            if(endInput) endInput.disabled = !isChecked;
+        };
+
+        function loadManagerScheduleUI() {
+            const container = document.getElementById('schedule-config-container');
+            const days = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
+            const savedSchedule = currentManager.working_hours || {};
+            
+            // Weekly UI
+            container.innerHTML = days.map((day, idx) => {
+                const dayData = savedSchedule[idx] || { open: false, start: '09:00', end: '18:00' };
+                return `
+                <div class="flex items-center gap-4 py-3 border-b border-slate-50 last:border-0 hover:bg-slate-50 rounded-lg px-2 transition-colors">
+                    <label class="w-28 flex items-center gap-3 cursor-pointer">
+                        <input type="checkbox" class="day-check w-4 h-4 text-blue-800 rounded border-slate-300 focus:ring-blue-500" data-day="${idx}" ${dayData.open ? 'checked' : ''} onchange="toggleDayInputs(${idx}, this.checked)">
+                        <span class="text-sm font-medium text-slate-700">${day}</span>
+                    </label>
+                    <input type="time" class="day-start text-xs border border-slate-200 rounded p-1.5 bg-white text-slate-900 focus:border-blue-500 outline-none" data-day="${idx}" value="${dayData.start}" ${!dayData.open ? 'disabled' : ''}>
+                    <span class="text-slate-300">-</span>
+                    <input type="time" class="day-end text-xs border border-slate-200 rounded p-1.5 bg-white text-slate-900 focus:border-blue-500 outline-none" data-day="${idx}" value="${dayData.end}" ${!dayData.open ? 'disabled' : ''}>
+                </div>
+            `;
+            }).join('');
+
+            const lunch = savedSchedule.lunch || { active: false, start: '12:00', end: '13:00' };
+            const check = document.getElementById('has-lunch-break');
+            check.checked = lunch.active;
+            document.getElementById('lunch-break-config').classList.toggle('hidden', !lunch.active);
+            check.onchange = (e) => document.getElementById('lunch-break-config').classList.toggle('hidden', !e.target.checked);
+            document.getElementById('lunch-start').value = lunch.start;
+            document.getElementById('lunch-end').value = lunch.end;
+            
+            // Special Dates Load - Fixing initialization
+            pendingSpecialDates = (savedSchedule.special && Array.isArray(savedSchedule.special)) ? savedSchedule.special : [];
+            renderSpecialDatesList();
+        }
+        
+        function addSpecialDate() {
+            const date = document.getElementById('special-date').value;
+            const start = document.getElementById('special-start').value;
+            const end = document.getElementById('special-end').value;
+            const closed = document.getElementById('special-closed').checked;
+            
+            if(!date) return alert('Selecione uma data.');
+            if(!closed && (!start || !end)) return alert('Preencha os horários ou marque como fechado.');
+            
+            pendingSpecialDates.push({ date, start, end, closed });
+            // Sort by date
+            pendingSpecialDates.sort((a,b) => new Date(a.date) - new Date(b.date));
+            renderSpecialDatesList();
+            
+            // Reset form
+            document.getElementById('special-date').value = '';
+            document.getElementById('special-start').value = '';
+            document.getElementById('special-end').value = '';
+            document.getElementById('special-closed').checked = false;
+        }
+        
+        function removeSpecialDate(idx) {
+            pendingSpecialDates.splice(idx, 1);
+            renderSpecialDatesList();
+        }
+        
+        function renderSpecialDatesList() {
+            const list = document.getElementById('special-dates-list');
+            if(!pendingSpecialDates || pendingSpecialDates.length === 0) {
+                list.innerHTML = '<div class="text-center text-xs text-slate-400 py-4">Nenhuma data especial configurada.</div>';
+                return;
+            }
+            list.innerHTML = pendingSpecialDates.map((item, idx) => {
+                const dateParts = item.date.split('-');
+                const dateFmt = `${dateParts[2]}/${dateParts[1]}/${dateParts[0]}`; // DD/MM/YYYY
+                const desc = item.closed ? '<span class="text-red-600 font-bold">FECHADO</span>' : `${item.start} - ${item.end}`;
+                return `
+                <div class="flex justify-between items-center bg-white p-2 border border-slate-200 rounded text-xs">
+                    <div><span class="font-bold text-slate-700">${dateFmt}</span> <span class="text-slate-400 mx-2">|</span> ${desc}</div>
+                    <button onclick="removeSpecialDate(${idx})" class="text-red-500 hover:text-red-700"><i data-lucide="trash" class="w-4 h-4"></i></button>
+                </div>`;
+            }).join('');
+            lucide.createIcons();
+        }
+
+        window.saveManagerSchedule = async () => {
+            const schedule = {};
+            document.querySelectorAll('.day-check').forEach(chk => {
+                const day = chk.getAttribute('data-day');
+                const start = document.querySelector(`.day-start[data-day="${day}"]`).value;
+                const end = document.querySelector(`.day-end[data-day="${day}"]`).value;
+                schedule[day] = { open: chk.checked, start, end };
+            });
+            schedule.lunch = {
+                active: document.getElementById('has-lunch-break').checked,
+                start: document.getElementById('lunch-start').value,
+                end: document.getElementById('lunch-end').value
+            };
+            
+            // Save Special Dates
+            schedule.special = pendingSpecialDates;
+
+            const { error } = await supabase.from('managers').update({ working_hours: schedule }).eq('id', currentManager.id);
+            if(error) { alert('Erro ao salvar horários.'); } else { alert('Horários atualizados!'); currentManager.working_hours = schedule; }
+        };
+
+        // --- AUTH & OTHER ---
+        async function loadWhatsappConfig() {
+            let waValue; 
+            try { waValue = localStorage.getItem('agendaai_whatsapp'); } catch(e) {}
+            try {
+                const { data } = await supabase.from('config').select('value').eq('key', 'whatsapp').single();
+                if(data && data.value) waValue = data.value;
+            } catch(e) {}
+
+            globalWhatsapp = waValue || ""; // Save to global variable
+
+            const waBtn = document.getElementById('whatsapp-btn');
+            const waInput = document.getElementById('config-whatsapp');
+
+            if (waValue) {
+                const cleanNum = waValue.replace(/\D/g, '');
+                const message = "Olá tenho interesse em contratar a agenda, gostaria de mais informações!";
+                waBtn.href = `https://wa.me/${cleanNum}?text=${encodeURIComponent(message)}`;
+                waBtn.classList.remove('hidden');
+                waBtn.classList.add('flex');
+                if(waInput) waInput.value = cleanNum;
+            } else {
+                waBtn.classList.add('hidden');
+            }
+        }
+
+        function getBrasiliaDate() { return new Date(new Date().toLocaleString("en-US", {timeZone: "America/Sao_Paulo"})); }
+        function updateBrasiliaClock() {
+            const now = getBrasiliaDate();
+            const timeStr = now.toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'});
+            const el = document.getElementById('brasilia-clock');
+            if(el) el.innerText = `Horário de Brasília: ${timeStr}`;
+        }
+
+        async function loadClientArea() {
+            const grid = document.getElementById('professionals-grid');
+            grid.innerHTML = '<div class="col-span-full text-center py-20"><i data-lucide="loader-2" class="w-8 h-8 animate-spin mx-auto text-blue-800"></i></div>';
+            lucide.createIcons();
+            
+            try {
+                // Fetch managers
+                const { data: managersData, error: managerError } = await supabase.from('managers').select('*').eq('is_active', true);
+                
+                if (managerError) throw managerError;
+                
+                // Fetch reviews to calculate average ratings
+                const { data: reviewsData, error: reviewsError } = await supabase.from('reviews')
+                    .select('rating, appointments!inner(manager_id)');
+                
+                if (reviewsError && reviewsError.code !== 'PGRST205') console.error('Error fetching reviews for stats:', reviewsError);
+
+                // Aggregate ratings
+                const managerStats = {}; // { managerId: { sum: 0, count: 0 } }
+                
+                if (reviewsData) {
+                    reviewsData.forEach(r => {
+                        const mid = r.appointments.manager_id;
+                        if (!managerStats[mid]) managerStats[mid] = { sum: 0, count: 0 };
+                        managerStats[mid].sum += r.rating;
+                        managerStats[mid].count++;
+                    });
+                }
+
+                // Merge stats into manager objects
+                allManagers = managersData.map(m => {
+                    const stats = managerStats[m.id];
+                    if (stats && stats.count > 0) {
+                        m.averageRating = (stats.sum / stats.count).toFixed(1);
+                        m.reviewCount = stats.count;
+                    } else {
+                        m.averageRating = null;
+                        m.reviewCount = 0;
+                    }
+                    return m;
+                });
+
+                populateFilters();
+                renderProfessionals(allManagers);
+
+            } catch (error) {
+                console.error(error);
+                grid.innerHTML = '<div class="col-span-full text-center text-red-500">Erro ao carregar profissionais.</div>';
+            }
+        }
+
+        function populateFilters() {
+            const cities = [...new Set(allManagers.map(m => m.city).filter(Boolean))];
+            const specialties = [...new Set(allManagers.map(m => m.specialty).filter(Boolean))];
+            
+            document.getElementById('client-filter-city').innerHTML = '<option value="">Todas as Cidades</option>' + cities.map(c => `<option value="${c}">${c}</option>`).join('');
+            document.getElementById('client-filter-specialty').innerHTML = '<option value="">Todas as Especialidades</option>' + specialties.map(s => `<option value="${s}">${s}</option>`).join('');
+            
+            document.getElementById('client-search').oninput = filterProfessionals;
+            document.getElementById('client-filter-city').onchange = filterProfessionals;
+            document.getElementById('client-filter-specialty').onchange = filterProfessionals;
+        }
+
+        function filterProfessionals() {
+            const term = document.getElementById('client-search').value.toLowerCase();
+            const city = document.getElementById('client-filter-city').value;
+            const spec = document.getElementById('client-filter-specialty').value;
+
+            const filtered = allManagers.filter(m => {
+                const matchTerm = (m.name && m.name.toLowerCase().includes(term)) || (m.establishment_name && m.establishment_name.toLowerCase().includes(term));
+                const matchCity = !city || m.city === city;
+                const matchSpec = !spec || m.specialty === spec;
+                return matchTerm && matchCity && matchSpec;
+            });
+
+            renderProfessionals(filtered);
+        }
+
+        function renderProfessionals(list) {
+            const grid = document.getElementById('professionals-grid');
+            if(!list || list.length === 0) { 
+                grid.innerHTML = '<div class="col-span-full text-center py-12 text-slate-400">Nenhum profissional encontrado.</div>'; 
+                return; 
+            }
+            grid.innerHTML = list.map(p => {
+                const isRecommended = p.averageRating && parseFloat(p.averageRating) >= 4.0;
+                
+                return `
+                <div class="bg-white rounded-xl border border-slate-200 p-6 hover:shadow-lg hover:border-blue-300 transition-all cursor-pointer group relative overflow-hidden" onclick="navigateTo('booking-public', ${p.id})">
+                        ${isRecommended ? '<div class="absolute top-0 right-0 bg-[#25D366] text-white text-[10px] font-bold px-3 py-1 rounded-bl-lg shadow-sm z-10 tracking-wide">PROFISSIONAL RECOMENDADO</div>' : ''}
+                        
+                        <div class="flex items-center gap-4 mb-4 mt-2">
+                        <div class="w-12 h-12 bg-blue-50 text-blue-800 rounded-full flex items-center justify-center font-bold text-lg group-hover:bg-blue-800 group-hover:text-white transition-colors overflow-hidden border border-slate-100 shrink-0">
+                            ${p.photo_url ? `<img src="${p.photo_url}" class="w-full h-full object-cover">` : p.name.charAt(0)}
+                        </div>
+                        <div>
+                            <div class="font-bold text-slate-900 group-hover:text-blue-800 transition-colors line-clamp-1">${p.name}</div>
+                            <div class="text-xs text-slate-500">${p.specialty || 'Profissional'}</div>
+                            
+                            ${p.averageRating ? `
+                                <div class="flex items-center gap-1 mt-1">
+                                    <i data-lucide="star" class="w-3 h-3 fill-yellow-400 text-yellow-400"></i>
+                                    <span class="text-xs font-bold text-slate-700">${p.averageRating}/5</span>
+                                    <span class="text-[10px] text-slate-400">(${p.reviewCount})</span>
+                                </div>
+                            ` : ''}
+                        </div>
+                        </div>
+                        <div class="text-xs text-slate-500 mb-4 line-clamp-1 flex items-center gap-1">
+                            ${p.city ? `<i data-lucide="map-pin" class="w-3 h-3"></i> ${p.city}` : ''}
+                            ${p.establishment_name ? `<span class="mx-1">•</span> ${p.establishment_name}` : ''}
+                        </div>
+                        <button class="w-full btn-primary text-white py-2 rounded-lg text-sm font-bold opacity-0 group-hover:opacity-100 transition-opacity">Ver Agenda</button>
+                </div>
+            `}).join('');
+            lucide.createIcons();
+        }
+
+        function loadSavedCredentials() { try { const u = localStorage.getItem('agendaai_saved_user'); const p = localStorage.getItem('agendaai_saved_pass'); if(u && p) { document.getElementById('manager-user').value = u; document.getElementById('manager-pass').value = p; document.getElementById('manager-remember').checked = true; } } catch(e){} }
+        document.getElementById('manager-login-form').onsubmit = async (e) => {
+            e.preventDefault(); const u = document.getElementById('manager-user').value; const p = document.getElementById('manager-pass').value; const r = document.getElementById('manager-remember').checked; const em = document.getElementById('manager-error-msg');
+            try {
+                const { data, error } = await supabase.from('managers').select('*').eq('username', u).eq('temp_password', p).single();
+                if(error || !data) throw new Error("Credenciais inválidas."); if(data.is_active === false) throw new Error("Conta desativada.");
+                if(r) { localStorage.setItem('agendaai_saved_user', u); localStorage.setItem('agendaai_saved_pass', p); } else { localStorage.removeItem('agendaai_saved_user'); localStorage.removeItem('agendaai_saved_pass'); }
+                currentManager = data; navigateTo('manager');
+            } catch(err) { em.innerText = err.message; em.classList.remove('hidden'); }
+        };
+        function logoutManager() { currentManager = null; navigateTo('landing'); }
+
+        window.saveManagerProfile = async () => {
+            const fileInput = document.getElementById('profile-photo-upload');
+            const wa = document.getElementById('profile-whatsapp').value;
+            const addr = document.getElementById('profile-address').value;
+            let photoData = currentManager.photo_url;
+            if (fileInput.files && fileInput.files[0]) {
+                const file = fileInput.files[0];
+                const toBase64 = file => new Promise((resolve, reject) => { const reader = new FileReader(); reader.readAsDataURL(file); reader.onload = () => resolve(reader.result); reader.onerror = error => reject(error); });
+                try { photoData = await toBase64(file); } catch(e) { alert("Erro ao processar imagem."); return; }
+            }
+            const { error } = await supabase.from('managers').update({ photo_url: photoData, contact_whatsapp: wa, address: addr }).eq('id', currentManager.id);
+            if(error) { console.error(error); alert('Erro ao salvar.'); } else { alert('Dados atualizados com sucesso!'); currentManager.photo_url = photoData; currentManager.contact_whatsapp = wa; currentManager.address = addr; loadManagerProfileUI(); }
+        };
+        
+        function loadManagerProfileUI() {
+            if(currentManager.photo_url) {
+                 document.getElementById('preview-photo').innerHTML = `<img src="${currentManager.photo_url}" class="w-full h-full object-cover">`;
+            }
+            if(currentManager.contact_whatsapp) document.getElementById('profile-whatsapp').value = currentManager.contact_whatsapp;
+            if(currentManager.address) document.getElementById('profile-address').value = currentManager.address;
+            renderServicesList();
+        }
+
+        document.getElementById('profile-photo-upload').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if(file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('preview-photo').innerHTML = `<img src="${e.target.result}" class="w-full h-full object-cover">`;
+                    document.getElementById('upload-feedback').innerText = "Imagem selecionada. Clique em Salvar Dados.";
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Service CRUD
+        function toggleServiceForm() { document.getElementById('service-form').classList.toggle('hidden'); document.getElementById('svc-name').value = ''; document.getElementById('svc-price').value = ''; document.getElementById('svc-duration').value = ''; document.getElementById('svc-policy').value = ''; }
+        function renderServicesList() { const list = document.getElementById('services-list'); const services = currentManager.services || []; if(services.length === 0) { list.innerHTML = '<div class="text-xs text-slate-400 text-center py-4">Nenhum serviço cadastrado.</div>'; return; } list.innerHTML = services.map((s, idx) => `<div class="flex justify-between items-center p-3 bg-white rounded-lg border border-slate-200 shadow-sm hover:shadow-md transition-all"><div><div class="font-bold text-sm text-slate-900">${s.name}</div><div class="text-xs text-slate-500">${s.duration} min • R$ ${s.price}</div>${s.policy ? '<div class="text-[10px] text-red-500 mt-1 font-medium">Política Ativa</div>' : ''}</div><button onclick="deleteService(${idx})" class="text-slate-400 hover:text-red-500 hover:bg-red-50 p-1.5 rounded-full transition-colors"><i data-lucide="trash" class="w-4 h-4"></i></button></div>`).join(''); lucide.createIcons(); }
+        window.addManagerService = async () => { const name = document.getElementById('svc-name').value; const price = document.getElementById('svc-price').value; const duration = document.getElementById('svc-duration').value; const policy = document.getElementById('svc-policy').value; if(!name || !price) return alert("Preencha nome e valor"); const newSvc = { name, price, duration, policy }; const services = currentManager.services || []; services.push(newSvc); await updateServicesDB(services); toggleServiceForm(); };
+        window.deleteService = async (idx) => { if(!confirm("Excluir serviço?")) return; const services = currentManager.services || []; services.splice(idx, 1); await updateServicesDB(services); };
+        async function updateServicesDB(services) { const { error } = await supabase.from('managers').update({ services: services }).eq('id', currentManager.id); if(error) { alert('Erro ao atualizar serviços.'); } else { alert('Serviço salvo!'); currentManager.services = services; renderServicesList(); } }
+        
+        // Recovery
+        function initRecoveryAnimation() { let p = 0; recoveryInterval = setInterval(() => { p = (p+5)%100; const el = document.getElementById('auth-code-display'); if(el) el.innerText = Math.floor(Math.random()*900000+100000).toString().replace(/(\d{3})(\d{3})/, '$1 $2'); }, 100); }
+        function stopRecoveryAnimation() { if(recoveryInterval) clearInterval(recoveryInterval); }
+        document.getElementById('recovery-form').onsubmit = async (e) => { e.preventDefault(); const u = document.getElementById('recover-user').value; const s = document.getElementById('recover-secret').value; const n = document.getElementById('recover-new-pass').value; const { error } = await supabase.from('managers').update({temp_password: n}).eq('username', u).eq('secret_word', s); if(error) alert('Dados incorretos.'); else { alert('Senha alterada!'); navigateTo('manager-login'); } };
+
+        // --- DEV DASHBOARD ---
+        const FIXED_DEV_PASS = '220624';
+        document.getElementById('dev-login-form').onsubmit = (e) => { e.preventDefault(); if(document.getElementById('dev-password').value === FIXED_DEV_PASS) { navigateTo('developer-dashboard'); } else { document.getElementById('dev-error-msg').classList.remove('hidden'); } };
+        function logoutDev() { navigateTo('landing'); }
+        async function loadDeveloperData() { updateStats(); fetchManagersAdmin(); fetchTestimonialsAdmin(); } // Added fetchTestimonialsAdmin call
+        async function updateStats() { const {count:m}=await supabase.from('managers').select('*',{count:'exact',head:true}); document.getElementById('stat-managers').innerText=m||0; const {count:l}=await supabase.from('leads').select('*',{count:'exact',head:true}); document.getElementById('stat-leads').innerText=l||0; }
+        function copySql() { navigator.clipboard.writeText(document.getElementById('sql-code-block').innerText).then(()=>alert('Copiado!')); }
+        const formConfigWa = document.getElementById('form-config-whatsapp');
+        if(formConfigWa) formConfigWa.onsubmit = async (e) => { e.preventDefault(); let v = document.getElementById('config-whatsapp').value.replace(/\D/g, ''); localStorage.setItem('agendaai_whatsapp', v); await supabase.from('config').upsert({key:'whatsapp', value:v}); alert('Salvo!'); loadWhatsappConfig(); };
+
+        // Testimonials Admin Logic
+        async function fetchTestimonialsAdmin() {
+            const list = document.getElementById('list-testimonials');
+            list.innerHTML = '<div class="text-center py-4"><i data-lucide="loader-2" class="w-6 h-6 animate-spin mx-auto text-blue-800"></i></div>';
+            lucide.createIcons();
+            
+            try {
+                const { data, error } = await supabase.from('testimonials').select('*').order('created_at', {ascending: false});
+                
+                if (error) {
+                    console.error('Testimonial Fetch Error:', error);
+                    // If table missing or RLS error
+                    if (error.code === '42P01' || error.code === 'PGRST205' || error.message.includes('relation "public.testimonials" does not exist')) {
+                         list.innerHTML = `
+                            <div class="bg-amber-50 p-4 rounded-lg border border-amber-200 text-center">
+                                <p class="text-xs text-amber-800 font-bold mb-2">⚠️ Tabela 'testimonials' não encontrada.</p>
+                                <p class="text-xs text-amber-700 mb-3">Para gerenciar os comentários, você precisa criar a tabela no banco de dados.</p>
+                                <button onclick="copySql()" class="text-xs bg-slate-800 text-white px-3 py-2 rounded hover:bg-slate-900 transition-colors">Copiar Código SQL</button>
+                            </div>
+                         `;
+                         return;
+                    }
+                    throw error;
+                }
+
+                adminTestimonialsList = data || [];
+                renderTestimonialsAdminList();
+
+            } catch(e) {
+                console.error(e);
+                list.innerHTML = '<div class="text-xs text-red-500 text-center py-4">Erro de conexão ao buscar comentários. Tente recarregar.</div>';
+            }
+        }
+
+        function renderTestimonialsAdminList() {
+            const list = document.getElementById('list-testimonials');
+            
+            // If DB is empty, show the fallback items as "Ghost/Demo" items that can be imported
+            if(adminTestimonialsList.length === 0) {
+                const defaults = [
+                    { name: "Mariana Silva", user_type: "Cliente", comment: "Agendar ficou muito mais fácil. Em poucos cliques já escolho o profissional e o horário. Simples e rápido!", photo_url: null },
+                    { name: "Dr. Carlos Mendes", user_type: "Profissional", comment: "Hoje tenho total controle da minha agenda e dos meus horários. Mudou minha rotina.", photo_url: null },
+                    { name: "Fernanda Costa", user_type: "Cliente", comment: "Nunca mais precisei trocar várias mensagens. O MarcAI Agenda resolveu tudo pra mim.", photo_url: null },
+                    { name: "Estúdio Bella", user_type: "Profissional", comment: "Consigo organizar meus clientes, evitar conflitos e ganhar tempo.", photo_url: null },
+                    { name: "Lucas Pereira", user_type: "Cliente", comment: "Interface linda e fácil de usar. Recomendo demais!", photo_url: null },
+                    { name: "Barbearia Vip", user_type: "Profissional", comment: "Ferramenta essencial para quem atende por horário.", photo_url: null }
+                ];
+                
+                const demoHtml = defaults.map(t => `
+                    <div class="flex justify-between items-center p-3 border border-slate-100 mb-2 rounded-lg bg-slate-50 opacity-70 grayscale-[0.5]">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center text-xs font-bold text-slate-400">${t.name.charAt(0)}</div>
+                            <div>
+                                <div class="font-bold text-sm text-slate-700">${t.name} <span class="text-[10px] bg-slate-200 text-slate-500 px-1.5 py-0.5 rounded ml-1">Exemplo</span></div>
+                                <div class="text-xs text-slate-500 line-clamp-1 italic">"${t.comment}"</div>
+                            </div>
+                        </div>
+                        <div class="text-[10px] font-bold text-slate-400">Padrão do Sistema</div>
+                    </div>
+                `).join('');
+
+                list.innerHTML = `
+                    <div class="mb-4">
+                        ${demoHtml}
+                    </div>
+                    <div class="text-center py-4 bg-blue-50 rounded-lg border border-blue-100 border-dashed">
+                        <p class="text-xs text-blue-800 mb-2 font-medium">Você está vendo os comentários padrão da Home.</p>
+                        <button onclick="importDefaultTestimonials()" class="text-xs bg-blue-600 text-white px-4 py-2 rounded-lg font-bold hover:bg-blue-700 transition-colors shadow-sm flex items-center gap-2 mx-auto">
+                            <i data-lucide="download" class="w-4 h-4"></i> Importar estes Comentários para Editar
+                        </button>
+                    </div>
+                `;
+                lucide.createIcons();
+                return;
+            }
+
+            // Normal render if data exists
+            list.innerHTML = adminTestimonialsList.map(t => `
+                <div class="flex justify-between items-center p-3 border border-slate-100 mb-2 rounded-lg bg-white shadow-sm">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-full bg-slate-100 overflow-hidden border border-slate-200">
+                             ${t.photo_url ? `<img src="${t.photo_url}" class="w-full h-full object-cover">` : `<div class="w-full h-full flex items-center justify-center text-xs font-bold text-slate-400">${t.name.charAt(0)}</div>`}
+                        </div>
+                        <div>
+                            <div class="font-bold text-sm text-slate-900">${t.name} <span class="text-[10px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded ml-1 font-normal border border-slate-200">${t.user_type || t.type}</span></div>
+                            <div class="text-xs text-slate-500 line-clamp-1 italic">"${t.comment}"</div>
+                        </div>
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="editTestimonial(${t.id})" title="Editar" class="p-1.5 hover:bg-blue-50 rounded text-blue-500 transition-colors"><i data-lucide="edit-2" class="w-4 h-4"></i></button>
+                        <button onclick="toggleTestimonialStatus(${t.id}, ${!t.is_active})" title="${t.is_active ? 'Ocultar' : 'Exibir'}" class="p-1.5 hover:bg-slate-100 rounded ${t.is_active ? 'text-green-500' : 'text-slate-300'} transition-colors"><i data-lucide="power" class="w-4 h-4"></i></button>
+                        <button onclick="deleteTestimonial(${t.id})" title="Excluir" class="p-1.5 hover:bg-red-50 rounded text-red-500 transition-colors"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                    </div>
+                </div>
+            `).join('');
+            lucide.createIcons();
+        }
+
+        async function importDefaultTestimonials() {
+            if(!confirm("Deseja importar os comentários de exemplo para o banco de dados?")) return;
+            
+            const defaults = [
+                { name: "Mariana Silva", user_type: "Cliente", comment: "Agendar ficou muito mais fácil. Em poucos cliques já escolho o profissional e o horário. Simples e rápido!", rating: 5, photo_url: null, is_active: true },
+                { name: "Dr. Carlos Mendes", user_type: "Profissional", comment: "Hoje tenho total controle da minha agenda e dos meus horários. Mudou minha rotina.", rating: 5, photo_url: null, is_active: true },
+                { name: "Fernanda Costa", user_type: "Cliente", comment: "Nunca mais precisei trocar várias mensagens. O MarcAI Agenda resolveu tudo pra mim.", rating: 5, photo_url: null, is_active: true },
+                { name: "Estúdio Bella", user_type: "Profissional", comment: "Consigo organizar meus clientes, evitar conflitos e ganhar tempo.", rating: 5, photo_url: null, is_active: true },
+                { name: "Lucas Pereira", user_type: "Cliente", comment: "Interface linda e fácil de usar. Recomendo demais!", rating: 5, photo_url: null, is_active: true },
+                { name: "Barbearia Vip", user_type: "Profissional", comment: "Ferramenta essencial para quem atende por horário.", rating: 5, photo_url: null, is_active: true }
+            ];
+
+            const { error } = await supabase.from('testimonials').insert(defaults);
+            if(error) {
+                alert("Erro ao importar: " + error.message);
+            } else {
+                alert("Importado com sucesso!");
+                fetchTestimonialsAdmin();
+            }
+        }
+
+        const formTestimonial = document.getElementById('form-create-testimonial');
+        if(formTestimonial) formTestimonial.onsubmit = async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('btn-submit-testimonial');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = 'Salvando...';
+            btn.disabled = true;
+
+            const id = document.getElementById('testimonial-id').value;
+            const name = document.getElementById('t-name').value;
+            const type = document.getElementById('t-type').value;
+            const comment = document.getElementById('t-comment').value;
+            const active = document.getElementById('t-active').checked;
+            const fileInput = document.getElementById('t-photo-upload');
+
+            let photoUrl = null;
+            // Check if editing and keep old photo if no new one
+            if(id) {
+                const existing = adminTestimonialsList.find(x => x.id == id);
+                if(existing) photoUrl = existing.photo_url;
+            }
+
+            if (fileInput.files && fileInput.files[0]) {
+                const file = fileInput.files[0];
+                const toBase64 = file => new Promise((resolve, reject) => { const reader = new FileReader(); reader.readAsDataURL(file); reader.onload = () => resolve(reader.result); reader.onerror = error => reject(error); });
+                try { photoUrl = await toBase64(file); } catch(e) {}
+            }
+
+            const payload = {
+                name: name,
+                user_type: type,
+                comment: comment,
+                is_active: active,
+                photo_url: photoUrl,
+                rating: 5
+            };
+
+            let result;
+            if(id) {
+                result = await supabase.from('testimonials').update(payload).eq('id', id);
+            } else {
+                result = await supabase.from('testimonials').insert([payload]);
+            }
+
+            if(result.error) {
+                alert('Erro ao salvar: ' + result.error.message);
+            } else {
+                alert('Salvo com sucesso!');
+                resetTestimonialForm();
+                fetchTestimonialsAdmin();
+            }
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+        };
+
+        window.editTestimonial = (id) => {
+            const t = adminTestimonialsList.find(x => x.id == id);
+            if(!t) return;
+            document.getElementById('testimonial-id').value = t.id;
+            document.getElementById('t-name').value = t.name;
+            document.getElementById('t-type').value = t.user_type || t.type;
+            document.getElementById('t-comment').value = t.comment;
+            document.getElementById('t-active').checked = t.is_active;
+            
+            // UI Update
+            document.getElementById('btn-text-testimonial').innerText = 'Salvar Alteração';
+            document.getElementById('btn-new-testimonial').classList.remove('hidden');
+            document.getElementById('form-create-testimonial').scrollIntoView();
+        };
+
+        window.resetTestimonialForm = () => {
+            document.getElementById('form-create-testimonial').reset();
+            document.getElementById('testimonial-id').value = '';
+            document.getElementById('btn-text-testimonial').innerText = 'Adicionar Comentário';
+            document.getElementById('btn-new-testimonial').classList.add('hidden');
+        };
+
+        window.toggleTestimonialStatus = async (id, status) => {
+            await supabase.from('testimonials').update({is_active: status}).eq('id', id);
+            fetchTestimonialsAdmin();
+        };
+
+        window.deleteTestimonial = async (id) => {
+            if(confirm('Tem certeza que deseja excluir este comentário?')) {
+                await supabase.from('testimonials').delete().eq('id', id);
+                fetchTestimonialsAdmin();
+            }
+        };
+
+
+        async function fetchManagersAdmin() { const l=document.getElementById('list-managers'); l.innerHTML='Carregando...'; const {data}=await supabase.from('managers').select('*').order('created_at',{ascending:false}); adminManagersList=data||[]; 
+            l.innerHTML=adminManagersList.map(m=> {
+                const isPremium = m.enable_custom_link || m.enable_reviews;
+                const premiumBadge = isPremium ? '<span class="text-[10px] bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded font-bold ml-2 uppercase border border-amber-200">Premium</span>' : '';
+                return `<div class="flex justify-between p-2 border mb-2 rounded bg-white"><div><span class="font-bold text-sm">${m.name}</span>${premiumBadge} <span class="text-xs ${m.is_active?'text-green-600':'text-red-600'} block mt-1">${m.is_active?'Ativo':'Inativo'}</span></div><div class="flex gap-2"><button onclick="editManager(${m.id})"><i data-lucide="edit-2" class="w-4 h-4 text-blue-500"></i></button><button onclick="toggleManagerStatus(${m.id},${!m.is_active})"><i data-lucide="power" class="w-4 h-4 text-amber-500"></i></button><button onclick="deleteManager(${m.id})"><i data-lucide="trash-2" class="w-4 h-4 text-red-500"></i></button></div></div>`;
+            }).join(''); 
+            lucide.createIcons(); 
+        }
+        
+        window.editManager=(id)=>{ 
+            const m=adminManagersList.find(x=>x.id==id); 
+            if(m){ 
+                document.getElementById('manager-id').value=m.id; 
+                document.getElementById('field-name').value=m.name; 
+                document.getElementById('field-est').value=m.establishment_name; 
+                document.getElementById('field-spec').value=m.specialty; 
+                document.getElementById('field-city').value=m.city; 
+                document.getElementById('field-neigh').value=m.neighborhood; 
+                document.getElementById('field-user').value=m.username; 
+                document.getElementById('field-pass').value=m.temp_password; 
+                document.getElementById('field-secret').value=m.secret_word; 
+                document.getElementById('field-exp').value=m.expiration_days; 
+                
+                document.getElementById('field-enable-link').checked = !!m.enable_custom_link;
+                document.getElementById('field-enable-reviews').checked = !!m.enable_reviews;
+
+                // UI Changes for Edit
+                // FIXED: Use innerHTML to reset button content so Lucide can re-render the icon
+                const btn = document.getElementById('btn-submit-manager');
+                btn.innerHTML = '<i data-lucide="save" class="w-4 h-4"></i> <span id="btn-text-manager">Salvar Alterações</span>';
+                
+                document.getElementById('btn-new-manager').classList.remove('hidden');
+                lucide.createIcons();
+
+                document.getElementById('form-create-manager').scrollIntoView(); 
+            } 
+        };
+        window.toggleManagerStatus=async(id,s)=>{ await supabase.from('managers').update({is_active:s}).eq('id',id); fetchManagersAdmin(); };
+        window.deleteManager=async(id)=>{ if(confirm('Excluir?')){ await supabase.from('appointments').delete().eq('manager_id',id); await supabase.from('managers').delete().eq('id',id); fetchManagersAdmin(); } };
+        const fm = document.getElementById('form-create-manager'); if(fm) fm.onsubmit=async(e)=>{ 
+            e.preventDefault(); 
+            const fd=new FormData(e.target); 
+            const d=Object.fromEntries(fd); 
+            const id=d.id; 
+            delete d.id; 
+            d.is_active=true;
+            
+            // Explicitly handle checkboxes
+            d.enable_custom_link = document.getElementById('field-enable-link').checked;
+            d.enable_reviews = document.getElementById('field-enable-reviews').checked;
+
+            let result;
+            if(id) {
+                result = await supabase.from('managers').update(d).eq('id',id); 
+            } else {
+                result = await supabase.from('managers').insert([d]); 
+            }
+
+            if (result.error) {
+                alert('Erro ao salvar: ' + result.error.message);
+                console.error(result.error);
+            } else {
+                alert('Salvo!'); 
+                e.target.reset(); 
+                resetManagerForm(); // Automatically reset to "Create New" state after save
+                fetchManagersAdmin(); 
+            }
+        };
+        function resetManagerForm() { 
+            if(fm) fm.reset(); 
+            // FIXED: Explicitly clear the hidden ID field so it doesn't persist
+            document.getElementById('manager-id').value = ''; 
+            
+            // UI Changes for New
+            // FIXED: Use innerHTML to reset button content
+            const btn = document.getElementById('btn-submit-manager');
+            btn.innerHTML = '<i data-lucide="plus-circle" class="w-4 h-4"></i> <span id="btn-text-manager">Adicionar Profissional</span>';
+            
+            document.getElementById('btn-new-manager').classList.add('hidden');
+            lucide.createIcons();
+        }
+
+        // Mobile Menu
+        document.getElementById('mobile-menu-btn').onclick = () => document.getElementById('mobile-menu').classList.toggle('open');
+        // Lead Modal
+        const lm = document.getElementById('lead-modal'); if(lm) { document.getElementById('close-modal').onclick = () => lm.classList.add('hidden'); document.getElementById('lead-form').onsubmit = async (e) => { e.preventDefault(); const email = document.getElementById('lead-email').value; await supabase.from('leads').insert([{email}]); alert('Cadastrado!'); lm.classList.add('hidden'); }; }
+    </script>
+<script type="module" src="/index.tsx"></script>
+</body>
+</html>
